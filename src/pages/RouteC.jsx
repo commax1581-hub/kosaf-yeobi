@@ -433,7 +433,7 @@ function gHTML(s, adjs, imgs){
         +"<div class='r rf'><span>최종 개인 청구액</span><span>"+W(totP)+"</span></div></div>"
       :"<div class=sum><div style=font-weight:700;color:#991b1b;margin-bottom:4px>여비 지급 없음 — 전액 미지급</div><div style=font-size:12px>근거: "+(s.policyBasis||"")+"</div></div>")
     +"<div class=dl>⏰ 정산 마감: "+dlS+" / 제10조의2</div>";
-  return "<!DOCTYPE html><html lang=ko><head><meta charset=UTF-8><title>연수 여비 정산 보고서</title><style>"+css+"</style></head><body>"+body++
+  return "<!DOCTYPE html><html lang=ko><head><meta charset=UTF-8><title>연수 여비 정산 보고서</title><style>"+css+"</style></head><body>"+body+
     (Object.keys(imgs).length > 0 ?
       Object.entries(imgs).filter(([k,v])=>v).map(([k,v])=>{
         const labels={"confirm":"연수 확인서","transport":"교통비 영수증","accom":"숙박비 영수증","etc":"기타 증빙"};
