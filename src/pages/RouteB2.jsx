@@ -99,23 +99,6 @@ const TollParkUI = ({ label, hasKey, amtKey, cardKey, reasonKey, si, t, updT }) 
 );
 
 /* ── 샘플 이전 데이터 (1단계에서 전달) ── */
-/* ── 1단계 데이터 불러오기 ── */
-const _raw1 = (() => {
-  try { return JSON.parse(localStorage.getItem("b_step1") || "null"); } catch { return null; }
-})();
-const PREV = _raw1 || {
-  grade: "팀원",
-  startDate: "2026-04-09", startTime: "09:00",
-  endDate:   "2026-04-13", endTime:   "18:00",
-  hasComp: true,
-  companions: [{ name: "김팀장", grade: "부서장·팀장" }],
-  routes: [
-    { region: "서울특별시", place: "서울 OO기관", reason: "업무협의",  nights: 2 },
-    { region: "대전광역시", place: "대전 OO기관", reason: "계약체결", nights: 2 },
-  ],
-};
-const _isFromStorage1 = !!_raw1;
-
 /* ── 구간 목록 생성 ── */
 function buildSegs(routes) {
   const pts = ["대구센터", ...routes.map(r => `${r.region} ${r.place}`), "대구센터"];
@@ -198,6 +181,23 @@ function isDayDeduct(t, idx, allT) {
 /* ── 메인 ── */
 export default function RouteB2() {
   const navigate = useNavigate();
+  /* ── 1단계 데이터 불러오기 (컴포넌트 내부) ── */
+  const _raw1 = (() => {
+    try { return JSON.parse(localStorage.getItem("b_step1") || "null"); } catch { return null; }
+  })();
+  const PREV = _raw1 || {
+    grade: "팀원",
+    startDate: "2026-04-09", startTime: "09:00",
+    endDate:   "2026-04-13", endTime:   "18:00",
+    hasComp: true,
+    companions: [{ name: "김팀장", grade: "부서장·팀장" }],
+    routes: [
+      { region: "서울특별시", place: "서울 OO기관", reason: "업무협의",  nights: 2 },
+      { region: "대전광역시", place: "대전 OO기관", reason: "계약체결", nights: 2 },
+    ],
+  };
+  const _isFromStorage1 = !!_raw1;
+
   const [ts, setTs] = useState(buildSegs(PREV.routes).map(() => emptyT()));
   const [cur, setCur] = useState(0);
   const [showSummary, setShowSummary] = useState(false);

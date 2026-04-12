@@ -41,22 +41,6 @@ const TBtn = ({sel,onClick,children,small}) => (
   >{children}</button>
 );
 /* ── 샘플 이전 데이터 ── */
-/* ── 1·2단계 데이터 불러오기 ── */
-const _raw1 = (() => { try { return JSON.parse(localStorage.getItem("b_step1")||"null"); } catch { return null; } })();
-const _raw2 = (() => { try { return JSON.parse(localStorage.getItem("b_step2")||"null"); } catch { return null; } })();
-const _isFromStorage = !!_raw1;
-const PREV = _raw1 || {
-  grade: "팀원",
-  startDate: "2026-04-09", startTime: "09:00",
-  endDate:   "2026-04-13", endTime:   "18:00",
-  hasComp: true,
-  companions: [{ name: "김팀장", grade: "부서장·팀장" }],
-  routes: [
-    { region: "서울특별시", place: "서울 OO기관", reason: "업무협의",  nights: 2 },
-    { region: "대전광역시", place: "대전 OO기관", reason: "계약체결", nights: 2 },
-  ],
-};
-
 /* ── 출장자 목록 ── */
 function buildTravelers(prev) {
   const list = [{ name: prev.grade + " (본인)", isSelf: true }];
@@ -273,6 +257,22 @@ const NightRow = ({ n, nightNum, nightDate, limit, onUpdate }) => {
 /* ══════════════ 메인 ══════════════ */
 export default function RouteB3() {
   const navigate = useNavigate();
+  /* ── 1·2단계 데이터 불러오기 (컴포넌트 내부) ── */
+  const _raw1 = (() => { try { return JSON.parse(localStorage.getItem("b_step1")||"null"); } catch { return null; } })();
+  const _raw2 = (() => { try { return JSON.parse(localStorage.getItem("b_step2")||"null"); } catch { return null; } })();
+  const _isFromStorage = !!_raw1;
+  const PREV = _raw1 || {
+    grade: "팀원",
+    startDate: "2026-04-09", startTime: "09:00",
+    endDate:   "2026-04-13", endTime:   "18:00",
+    hasComp: true,
+    companions: [{ name: "김팀장", grade: "부서장·팀장" }],
+    routes: [
+      { region: "서울특별시", place: "서울 OO기관", reason: "업무협의",  nights: 2 },
+      { region: "대전광역시", place: "대전 OO기관", reason: "계약체결", nights: 2 },
+    ],
+  };
+
   const [st, setSt] = useState(() => initState(PREV));
   const [showSummary, setShowSummary] = useState(false);
 

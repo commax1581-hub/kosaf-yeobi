@@ -604,7 +604,7 @@ export default function RouteB5(){
         </div>
         <div className="flex justify-between">
           <Btn onClick={()=>setStep(3)}>← 보고서</Btn>
-          <Btn primary onClick={reset}>새 정산 시작</Btn>
+          <Btn primary onClick={()=>{reset();setScreen("start");}}>새 정산 시작</Btn>
         </div>
       </>}
     </div>

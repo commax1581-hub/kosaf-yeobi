@@ -29,33 +29,6 @@ const TBtn = ({sel,onClick,children,small}) => (
   >{children}</button>
 );
 
-/* ── 샘플 이전 데이터 ── */
-/* ── 1·2·3단계 데이터 불러오기 ── */
-const _raw1 = (() => { try { return JSON.parse(localStorage.getItem("b_step1")||"null"); } catch { return null; } })();
-const _raw2 = (() => { try { return JSON.parse(localStorage.getItem("b_step2")||"null"); } catch { return null; } })();
-const _raw3 = (() => { try { return JSON.parse(localStorage.getItem("b_step3")||"null"); } catch { return null; } })();
-const _isFromStorage = !!_raw1;
-const PREV = _raw1 ? {
-  ..._raw1,
-  transport: ((_raw2&&_raw2.transport)||[]).map(t=>({seg:t.seg||"", type:t.type||""})),
-  routes: _raw1.routes,
-} : {
-  grade: "팀원",
-  startDate: "2026-04-09", startTime: "09:00",
-  endDate:   "2026-04-13", endTime:   "18:00",
-  hasComp: true,
-  companions: [{ name: "김팀장", grade: "부서장·팀장" }],
-  routes: [
-    { region: "서울특별시", place: "서울 OO기관", nights: 2 },
-    { region: "대전광역시", place: "대전 OO기관", nights: 2 },
-  ],
-  /* 2단계 교통수단 요약 */
-  transport: [
-    { seg: "대구→서울", type: "ktx" },
-    { seg: "서울→대전", type: "gov" },   // 관용차 이용
-    { seg: "대전→대구", type: "ktx" },
-  ],
-};
 
 function effectiveGrade(myGrade,hasComp,companions){
   if(!hasComp||!companions||!companions.length) return myGrade;
@@ -200,6 +173,32 @@ const DayRow = ({ d, onUpdate, showMeal, showDay }) => {
 /* ══════════════ 메인 ══════════════ */
 export default function RouteB4() {
   const navigate = useNavigate();
+  /* ── 1·2·3단계 데이터 불러오기 (컴포넌트 내부) ── */
+  const _raw1 = (() => { try { return JSON.parse(localStorage.getItem("b_step1")||"null"); } catch { return null; } })();
+  const _raw2 = (() => { try { return JSON.parse(localStorage.getItem("b_step2")||"null"); } catch { return null; } })();
+  const _raw3 = (() => { try { return JSON.parse(localStorage.getItem("b_step3")||"null"); } catch { return null; } })();
+  const _isFromStorage = !!_raw1;
+  const PREV = _raw1 ? {
+    ..._raw1,
+    transport: ((_raw2&&_raw2.transport)||[]).map(t=>({seg:t.seg||"", type:t.type||"", nights:t.nights||0})),
+    routes: _raw1.routes,
+  } : {
+    grade: "팀원",
+    startDate: "2026-04-09", startTime: "09:00",
+    endDate:   "2026-04-13", endTime:   "18:00",
+    hasComp: true,
+    companions: [{ name: "김팀장", grade: "부서장·팀장" }],
+    routes: [
+      { region: "서울특별시", place: "서울 OO기관", nights: 2 },
+      { region: "대전광역시", place: "대전 OO기관", nights: 2 },
+    ],
+    transport: [
+      { seg: "대구→서울", type: "ktx" },
+      { seg: "서울→대전", type: "gov" },
+      { seg: "대전→대구", type: "ktx" },
+    ],
+  };
+
   const days = buildDays(PREV.startDate, PREV.endDate);
   const { hasVehicle, hasGov, hasCar } = detectVehicleDays(PREV.transport);
 
