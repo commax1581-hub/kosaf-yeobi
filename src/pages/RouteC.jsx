@@ -255,6 +255,56 @@ const PS=["기본정보","지급방침","교통·숙박","일비·식비","감�
 const PN=["기본정보","지급방침","완료·저장"];
 
 /* ══════════════ 메인 ══════════════ */
+
+/* ── 이미지 압축 ── */
+async function compressImage(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const MAX=1200,ratio=Math.min(MAX/img.width,MAX/img.height,1);
+        const c=document.createElement("canvas");
+        c.width=Math.round(img.width*ratio);c.height=Math.round(img.height*ratio);
+        c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+        res({base64:c.toDataURL("image/jpeg",0.8),name:file.name});
+      };
+      img.onerror=rej;
+      img.src=e.target.result;
+    };
+    r.onerror=rej;
+    r.readAsDataURL(file);
+  });
+}
+
+/* ── 이미지 업로드 박스 ── */
+const ImageUploadBox=({label,note,required,img,loading,onUpload,onRemove})=>{
+  const ref=useRef(null);
+  return(
+    <div className="border rounded-xl p-4 mb-3 bg-white">
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-sm font-medium text-gray-700">{label}{required&&<span className="text-red-400 ml-1">*</span>}</div>
+        {note&&<div className="text-xs text-gray-400">{note}</div>}
+      </div>
+      {loading?<div className="text-xs text-blue-500 text-center py-4">압축 중...</div>
+      :img?<div>
+        <img src={img.base64} alt={label} className="w-full max-h-36 object-contain border rounded-lg mb-2"/>
+        <div className="flex items-center justify-between">
+          <div className="text-xs text-gray-400 truncate">{img.name}</div>
+          <button className="text-xs text-red-400 ml-2 cursor-pointer" onClick={onRemove}>삭제</button>
+        </div>
+      </div>
+      :<button className="w-full border-2 border-dashed border-gray-200 rounded-xl py-6 text-center cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all"
+        onClick={()=>ref.current&&ref.current.click()}>
+        <div className="text-2xl mb-1">📎</div>
+        <div className="text-xs text-gray-400">클릭하여 이미지 첨부</div>
+        <input ref={ref} type="file" accept="image/*" className="hidden"
+          onChange={e=>{const f=e.target.files&&e.target.files[0];if(f)onUpload(f);e.target.value="";}}/>
+      </button>}
+    </div>
+  );
+};
+
 /* ── 보고서 오버레이 컴포넌트 (App 밖) ── */
 const ReportOverlay = ({html, fileName, onClose}) => {
   const handleSaveHtml = () => {
@@ -329,8 +379,9 @@ function dMail(s){
 
 
 
-function gHTML(s, adjs){
+function gHTML(s, adjs, imgs){
   adjs = adjs || [];
+  imgs = imgs || {};
   const W = n => Math.round(n||0).toLocaleString("ko-KR")+"원";
   const days = bldDays(s.startDate, s.endDate);
   const dl = new Date(s.endDate||new Date()); dl.setDate(dl.getDate()+8);
@@ -382,14 +433,22 @@ function gHTML(s, adjs){
         +"<div class='r rf'><span>최종 개인 청구액</span><span>"+W(totP)+"</span></div></div>"
       :"<div class=sum><div style=font-weight:700;color:#991b1b;margin-bottom:4px>여비 지급 없음 — 전액 미지급</div><div style=font-size:12px>근거: "+(s.policyBasis||"")+"</div></div>")
     +"<div class=dl>⏰ 정산 마감: "+dlS+" / 제10조의2</div>";
-  return "<!DOCTYPE html><html lang=ko><head><meta charset=UTF-8><title>연수 여비 정산 보고서</title><style>"+css+"</style></head><body>"+body+"</body></html>";
+  return "<!DOCTYPE html><html lang=ko><head><meta charset=UTF-8><title>연수 여비 정산 보고서</title><style>"+css+"</style></head><body>"+body++
+    (Object.keys(imgs).length > 0 ?
+      Object.entries(imgs).filter(([k,v])=>v).map(([k,v])=>{
+        const labels={"confirm":"연수 확인서","transport":"교통비 영수증","accom":"숙박비 영수증","etc":"기타 증빙"};
+        return "<div style=\'page-break-before:always;padding:20px\'><h1 style=\'font-size:16px;margin-bottom:16px\'>"+labels[k]+"</h1><img src=\'"+v.base64+"\' style=\'width:100%;max-height:600px;object-fit:contain\'/></div>";
+      }).join("") : "")+"</body></html>";
 }
 
 
 
 export default function RouteC(){
+  const navigate = useNavigate();
   const [s,setS]=useState(iS());
   const [step,setStep]=useState(0);
+  const [images,setImages]=useState({});
+  const [loadingImg,setLoadingImg]=useState({});
   const [saved,setSaved]=useState(false);
   const [reportHTML,setReportHTML]=useState(null);
   const [printed,setPrinted]=useState(false);
@@ -433,7 +492,14 @@ export default function RouteC(){
   const goS1=()=>{upd({policy:"",policyBasis:"",policyNote:""});setStep(1);};
   const goS2=()=>{const nights=s.isResidence&&tNights>0?Array.from({length:tNights},eN):[];setS(v=>({...v,nights,inbound:eT(),outbound:eT()}));setStep(2);};
   const goS3=()=>{setS(v=>({...v,dayData:days.map(d=>({...d,dayDeduct:false,b:false,l:false,d:false}))}));setStep(3);};
-  const hPrint=()=>{setReportHTML(gHTML(s,adjustments));setPrinted(true);};
+  const uploadImg=useCallback(async(key,file)=>{
+    setLoadingImg(p=>({...p,[key]:true}));
+    try{const r=await compressImage(file);setImages(p=>({...p,[key]:r}));}
+    catch(e){alert("이미지 오류: "+e.message);}
+    finally{setLoadingImg(p=>({...p,[key]:false}));}
+  },[]);
+  const removeImg=useCallback((key)=>setImages(p=>{const n={...p};delete n[key];return n;}),[]);
+  const hPrint=()=>{setReportHTML(gHTML(s,adjustments,images));setPrinted(true);};
   const hSave=()=>{sDataAdj(s,adjustments);setSaved(true);};
 
   return(
@@ -764,6 +830,22 @@ export default function RouteC(){
 
       {/* 완료·저장 */}
       {((step===2&&s.policy==="none")||(step===5&&s.policy!=="none"))&&<>
+        {/* ── 이미지 첨부 ── */}
+        <div className={card}>
+          <div className={ct}>증빙 이미지 첨부 (선택)</div>
+          <ImageUploadBox label="연수 확인서" required={false}
+            img={images["confirm"]} loading={!!loadingImg["confirm"]}
+            onUpload={f=>uploadImg("confirm",f)} onRemove={()=>removeImg("confirm")}/>
+          <ImageUploadBox label="교통비 영수증" required={false}
+            img={images["transport"]} loading={!!loadingImg["transport"]}
+            onUpload={f=>uploadImg("transport",f)} onRemove={()=>removeImg("transport")}/>
+          <ImageUploadBox label="숙박비 영수증" required={false}
+            img={images["accom"]} loading={!!loadingImg["accom"]}
+            onUpload={f=>uploadImg("accom",f)} onRemove={()=>removeImg("accom")}/>
+          <ImageUploadBox label="기타 증빙" required={false}
+            img={images["etc"]} loading={!!loadingImg["etc"]}
+            onUpload={f=>uploadImg("etc",f)} onRemove={()=>removeImg("etc")}/>
+        </div>
         <div className={card}>
           <div className="text-center py-3 mb-4">
             <div className="text-3xl mb-2">✅</div>
