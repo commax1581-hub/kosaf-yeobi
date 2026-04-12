@@ -596,7 +596,7 @@ export default function RouteB2() {
                     {CAR_REASONS.map((r, ri) => (
                       <label key={ri} className="flex items-start gap-2 py-1.5 cursor-pointer">
                         <input type="checkbox"
-                          checked={(t.carReasons&&t.carReasons.includes)(ri)}
+                          checked={!!(t.carReasons&&t.carReasons.includes(ri))}
                           onChange={() => updT(cur, { carReasons: toggle(t.carReasons || [], ri) })}
                           className="w-4 h-4 mt-0.5 accent-blue-500" />
                         <span className="text-sm text-gray-700">{r}</span>
