@@ -253,6 +253,7 @@ const ReportOverlay = ({html, fileName, onClose}) => {
 
 
 export default function RouteB5(){
+  const navigate = useNavigate();
   const [screen,setScreen]=useState("start");
   const [step,setStep]=useState(0);
   const [data,setData]=useState(SAMPLE);
@@ -332,36 +333,51 @@ export default function RouteB5(){
 
   /* ── 시작 화면 ── */
   if(screen==="start") return(
-    <div className="max-w-lg mx-auto p-6 pt-12">
-      <div className="text-center mb-8">
-        <div className="text-2xl font-medium text-gray-800 mb-1">출장비 정산 시스템</div>
-        <div className="text-sm text-gray-400">한국장학재단 여비규칙 기준</div>
+    <div className="max-w-lg mx-auto p-4 pb-12" style={{background:"#f0f4ff",minHeight:"100vh"}}>
+      <button onClick={()=>navigate("/")} className="flex items-center gap-1 text-sm text-gray-400 hover:text-blue-600 mb-3 cursor-pointer">
+        ← 처음으로
+      </button>
+      <div className="rounded-2xl mb-4 overflow-hidden shadow-sm">
+        <div style={{background:"linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 100%)"}} className="px-5 py-4">
+          <div className="text-white font-bold text-2xl leading-tight mb-0.5">KOSAF 여비를 부탁해....</div>
+          <div className="text-blue-200 text-sm">스마트 여비정산 시스템</div>
+          <div className="text-blue-300 text-xs mt-1">B경로 5단계 — 검증 · 보고서</div>
+        </div>
       </div>
-      <div className="space-y-3">
-        <button className="w-full border-2 border-blue-400 rounded-xl p-5 text-left hover:bg-blue-50 cursor-pointer"
-          onClick={()=>{
-            const loaded = loadFromStorage();
-            if(loaded) {
-              setData(loaded);
-              alert("✅ 저장된 1~4단계 데이터를 불러왔습니다.\n(" + loaded.startDate + " ~ " + loaded.endDate + " / " + loaded.grade + ")");
-            } else {
-              setData(SAMPLE);
-            }
-            setAdjustments([]);setImages({});setExtraImgs([]);setStep(0);setScreen("main");
-          }}>
-          <div className="font-medium text-blue-600 mb-1">새 정산 시작</div>
-          <div className="text-xs text-gray-400">1~4단계 저장 데이터 자동 불러오기 (없으면 샘플)</div>
-        </button>
-        <button className="w-full border-2 border-gray-200 rounded-xl p-5 text-left hover:bg-gray-50 cursor-pointer"
-          onClick={()=>loadRef.current&&loadRef.current.click()}>
-          <div className="font-medium text-gray-700 mb-1">기존 정산 불러오기</div>
-          <div className="text-xs text-gray-400">저장된 .json 파일을 불러와 수정·재출력</div>
-        </button>
-        <input ref={loadRef} type="file" accept=".json" className="hidden"
-          onChange={e=>{const f=e.target.files&&e.target.files[0];if(f)handleLoad(f);e.target.value="";}}/>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4">
+        <div className="text-sm font-semibold text-gray-700 mb-4">시작하기</div>
+        <div className="space-y-3">
+          <button className="w-full border-2 border-blue-200 rounded-xl p-4 text-left hover:bg-blue-50 cursor-pointer transition-all"
+            onClick={()=>{
+              const loaded = loadFromStorage();
+              if(loaded) {
+                setData(loaded);
+                setAdjustments([]);setImages({});setExtraImgs([]);setStep(0);setScreen("main");
+              } else {
+                alert("⚠️ B1~B4 단계 입력 데이터가 없습니다.\n\nB1단계부터 순서대로 입력해 주세요.");
+              }
+            }}>
+            <div className="font-semibold text-blue-600 mb-1">✅ 정산 검증 시작</div>
+            <div className="text-xs text-gray-400">B1~B4 입력 데이터를 불러와 검증합니다</div>
+          </button>
+          <button className="w-full border-2 border-gray-200 rounded-xl p-4 text-left hover:bg-gray-50 cursor-pointer transition-all"
+            onClick={()=>loadRef.current&&loadRef.current.click()}>
+            <div className="font-semibold text-gray-700 mb-1">📂 저장된 정산 불러오기</div>
+            <div className="text-xs text-gray-400">이전에 저장한 .json 파일로 재출력</div>
+          </button>
+          <input ref={loadRef} type="file" accept=".json" className="hidden"
+            onChange={e=>{const f=e.target.files&&e.target.files[0];if(f)handleLoad(f);e.target.value="";}}/>
+        </div>
       </div>
-      <div className={wbox+" mt-5 text-xs"}>⚠️ 브라우저를 닫으면 입력 내용이 초기화됩니다.</div>
-      <div className={ibox+" mt-2 text-xs"}>📱 입력은 모바일 가능 / 보고서 출력은 PC 권장</div>
+      <div className={wbox+" text-xs"}>
+        <div className="flex gap-2">
+          <span>⚠️</span>
+          <div>
+            <div>1. 브라우저를 닫으면 입력 내용이 초기화됩니다.</div>
+            <div>2. 정산 완료 후 반드시 JSON 파일로 저장하세요.</div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 
