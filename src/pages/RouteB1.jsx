@@ -57,6 +57,7 @@ function effectiveGrade(myGrade,hasComp,companions){
 }
 
 export default function RouteB1(){
+  const navigate = useNavigate();
   const [s,setS]=useState(init());
 
   const upd=useCallback(p=>setS(prev=>({...prev,...p})),[]);
@@ -524,8 +525,8 @@ export default function RouteB1(){
             };
             try{
               localStorage.setItem("b_step1",JSON.stringify(data));
-              navigate('/b/2');
-            }catch(e){alert("저장 오류: "+e.message);}
+            }catch(e){alert("저장 오류: "+e.message);return;}
+            navigate('/b/2');
           }}>2단계로 →</Btn>
         </div>
       </>}

@@ -199,6 +199,7 @@ const DayRow = ({ d, onUpdate, showMeal, showDay }) => {
 
 /* ══════════════ 메인 ══════════════ */
 export default function RouteB4() {
+  const navigate = useNavigate();
   const days = buildDays(PREV.startDate, PREV.endDate);
   const { hasVehicle, hasGov, hasCar } = detectVehicleDays(PREV.transport);
 
@@ -584,8 +585,8 @@ export default function RouteB4() {
                 })),
                 extSupport: extSupport,
               }));
-              alert("✅ 4단계 저장 완료!\n\n5단계(검증·보고서) 파일을 여세요.\n저장된 데이터가 자동으로 불러와집니다.");
-            } catch(e) { alert("저장 오류: " + e.message); }
+            } catch(e) { alert("저장 오류: " + e.message); return; }
+            navigate('/b/5');
           }}>5단계로 →</Btn>
         </div>
       </>}

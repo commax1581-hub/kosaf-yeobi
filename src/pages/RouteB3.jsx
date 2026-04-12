@@ -272,6 +272,7 @@ const NightRow = ({ n, nightNum, nightDate, limit, onUpdate }) => {
 
 /* ══════════════ 메인 ══════════════ */
 export default function RouteB3() {
+  const navigate = useNavigate();
   const [st, setSt] = useState(() => initState(PREV));
   const [showSummary, setShowSummary] = useState(false);
 
@@ -358,9 +359,8 @@ export default function RouteB3() {
         <div className="flex justify-end mt-4">
           <Btn primary onClick={() => {
               try {
-                localStorage.setItem("b_step3", JSON.stringify({ accom: st }));
-                alert("✅ 3단계 저장 완료!\n\n4단계(일비·식비) 파일을 여세요.\n저장된 데이터가 자동으로 불러와집니다.");
-              } catch(e) { alert("저장 오류: " + e.message); }
+            } catch(e) { alert("저장 오류: " + e.message); return; }
+            navigate('/b/4');
             }}>4단계로 →</Btn>
         </div>
       </div>
@@ -489,8 +489,8 @@ export default function RouteB3() {
           <Btn primary onClick={() => {
               try {
                 localStorage.setItem("b_step3", JSON.stringify({ accom: st }));
-                alert("✅ 3단계 저장 완료!\n\n4단계(일비·식비) 파일을 여세요.\n저장된 데이터가 자동으로 불러와집니다.");
-              } catch(e) { alert("저장 오류: " + e.message); }
+              } catch(e) { alert("저장 오류: " + e.message); return; }
+            navigate('/b/4');
             }}>4단계로 →</Btn>
         </div>
       </>}

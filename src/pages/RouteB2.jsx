@@ -197,6 +197,7 @@ function isDayDeduct(t, idx, allT) {
 
 /* ── 메인 ── */
 export default function RouteB2() {
+  const navigate = useNavigate();
   const [ts, setTs] = useState(buildSegs(PREV.routes).map(() => emptyT()));
   const [cur, setCur] = useState(0);
   const [showSummary, setShowSummary] = useState(false);
@@ -339,8 +340,8 @@ export default function RouteB2() {
             const data = { transport: ts };
             try {
               localStorage.setItem("b_step2", JSON.stringify(data));
-              alert("✅ 2단계 저장 완료!\n\n3단계(숙박비) 파일을 여세요.\n저장된 데이터가 자동으로 불러와집니다.");
-            } catch(e) { alert("저장 오류: " + e.message); }
+            } catch(e) { alert("저장 오류: " + e.message); return; }
+            navigate('/b/3');
           }}>3단계로 →</Btn>
         </div>
       </>}
