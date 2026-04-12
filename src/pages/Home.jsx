@@ -89,13 +89,32 @@ export default function Home() {
     <div className="max-w-lg mx-auto p-4 pb-4" style={{background:"#f0f4ff", minHeight:"100vh"}}>
 
       {/* ── 헤더 배너 ── */}
-      <div className="rounded-2xl mb-3 overflow-hidden shadow-sm">
-        <div style={{background:"linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 100%)"}} className="px-5 py-4">
-          <div className="text-white font-bold text-2xl leading-tight mb-0.5">KOSAF 여비를 부탁해....</div>
-          <div className="text-blue-200 text-sm mb-2">스마트 여비정산 시스템</div>
-          <div className="flex items-center justify-between">
-            <div className="text-blue-300 text-xs">한국장학재단 여비규칙 기준</div>
-            <div className="text-blue-200 text-xs bg-white/10 rounded-lg px-2 py-1">{todayStr}</div>
+      <div className="rounded-2xl mb-3 overflow-hidden shadow-sm" style={{position:"relative"}}>
+        <img
+          src="/hero-bg.png"
+          alt="배경"
+          style={{
+            width:"100%",
+            height:"160px",
+            objectFit:"cover",
+            objectPosition:"center 30%",
+            display:"block",
+          }}
+        />
+        <div style={{
+          position:"absolute",
+          inset:0,
+          background:"linear-gradient(135deg,rgba(30,58,138,0.72) 0%,rgba(29,78,216,0.60) 100%)",
+          display:"flex",
+          flexDirection:"column",
+          justifyContent:"center",
+          padding:"20px",
+        }}>
+          <div style={{color:"#fff",fontWeight:700,fontSize:"22px",lineHeight:1.2,marginBottom:"4px"}}>KOSAF 여비를 부탁해....</div>
+          <div style={{color:"#bfdbfe",fontSize:"13px",marginBottom:"8px"}}>스마트 여비정산 시스템</div>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div style={{color:"#93c5fd",fontSize:"11px"}}>한국장학재단 여비규칙 기준</div>
+            <div style={{color:"#bfdbfe",fontSize:"11px",background:"rgba(255,255,255,0.15)",borderRadius:"8px",padding:"3px 8px"}}>{todayStr}</div>
           </div>
         </div>
       </div>
