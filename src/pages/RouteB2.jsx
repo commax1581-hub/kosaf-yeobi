@@ -101,7 +101,8 @@ const TollParkUI = ({ label, hasKey, amtKey, cardKey, reasonKey, si, t, updT }) 
 /* ── 샘플 이전 데이터 (1단계에서 전달) ── */
 /* ── 구간 목록 생성 ── */
 function buildSegs(routes) {
-  const pts = ["대구센터", ...routes.map(r => `${r.region} ${r.place}`), "대구센터"];
+  const origin = PREV.origin || PREV.dept || "출발지";
+  const pts = [origin, ...routes.map(r => `${r.region} ${r.place}`), origin];
   return pts.slice(0, -1).map((from, i) => ({ from, to: pts[i + 1], idx: i }));
 }
 
@@ -355,7 +356,7 @@ export default function RouteB2() {
               onClick={() => setCur(i)}
             >
               <div>{isValid(ts[i]) ? "✅ " : ""}구간 {i+1}</div>
-              <div className="opacity-75 mt-0.5">{seg.from.replace("대구센터","대구")} →<br/>{seg.to.replace("대구센터(복귀)","대구복귀")}</div>
+              <div className="opacity-75 mt-0.5">{seg.from.replace(PREV.origin||PREV.dept||"출발지", (PREV.origin||PREV.dept||"출발지").slice(0,4))} →<br/>{seg.to.replace("대구센터(복귀)","대구복귀")}</div>
             </button>
           ))}
         </div>

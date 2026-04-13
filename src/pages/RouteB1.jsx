@@ -33,7 +33,8 @@ const TBtn = ({sel,onClick,children,small}) => (
 
 const init = () => ({
   step:0,
-  grade:"",
+  dept:"", origin:"",
+  name:"", grade:"",
   startDate:"", endDate:"",
   hasComp:null,
   companions:[{name:"",grade:""}],
@@ -133,6 +134,14 @@ export default function RouteB1(){
         <div className="text-lg font-medium mb-5">신청자 정보를 입력하세요</div>
         <div className={card}>
           <div className={ct}>신청자 정보</div>
+          <div className={lbl0}>소속부서(팀)</div>
+          <input className={inp} type="text" value={s.dept||""}
+            placeholder="예) 대구센터 창업지원팀"
+            onChange={e=>upd({dept:e.target.value, origin:e.target.value})}/>
+          <div className={lbl0}>출발지 (근무지)</div>
+          <input className={inp} type="text" value={s.origin||""}
+            placeholder="기본값: 소속부서와 동일 (수정 가능)"
+            onChange={e=>upd({origin:e.target.value})}/>
           <div className={lbl0}>성명</div>
           <input className={inp} type="text" value={s.name||""}
             placeholder="성명을 입력하세요"
@@ -473,7 +482,7 @@ export default function RouteB1(){
           <div className="text-sm">
             <div className="flex items-center gap-2 py-2">
               <span className="w-5 h-5 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center shrink-0">출</span>
-              <span className="text-gray-400">대구센터</span>
+              <span className="text-gray-400">{s.origin||"출발지"}</span>
             </div>
             {s.routes.filter(r=>r.place).map((r,i)=>(
               <div key={i}>
@@ -496,7 +505,7 @@ export default function RouteB1(){
             <div className="text-center text-gray-300 text-xs py-0.5">↓</div>
             <div className="flex items-center gap-2 py-2">
               <span className="w-5 h-5 rounded-full bg-gray-400 text-white text-xs flex items-center justify-center shrink-0">복</span>
-              <span className="text-gray-400">대구센터</span>
+              <span className="text-gray-400">{s.origin||"출발지"}</span>
             </div>
           </div>
           <div className="border-t border-gray-100 pt-3 mt-1 flex justify-between text-sm">
@@ -516,6 +525,7 @@ export default function RouteB1(){
           <Btn onClick={()=>upd({step:3})}>← 이전</Btn>
           <Btn primary onClick={()=>{
             const data={
+              dept:s.dept||"", origin:s.origin||s.dept||"",
               name:s.name, grade:s.grade,
               startDate:s.startDate, startTime:s.startTime||"09:00",
               endDate:s.endDate, endTime:s.endTime||"18:00",

@@ -91,7 +91,7 @@ function genHTML(s){
 
 
 const init = () => ({
-  step: 0, name: "", grade: "", sd: "", st: "09:00", ed: "", et: "18:00",
+  step: 0, name: "", grade: "", dept: "", origin: "", sd: "", st: "09:00", ed: "", et: "18:00",
   dests: [{ p: "", r: "" }], reason: "",
   gov: null, svcT: null, comp: null,
   comps: [{ n: "", g: "" }], adjustments: []
@@ -278,6 +278,14 @@ export default function RouteA() {
         <div className="text-lg font-medium mb-5">직급을 선택하세요</div>
         <div className={card}>
           <div className={ct}>신청자 정보</div>
+          <label className={lbl}>소속부서(팀)</label>
+          <input className={inp} type="text" value={s.dept}
+            placeholder="예) 대구센터 창업지원팀"
+            onChange={e => upd({ dept: e.target.value, origin: e.target.value })}/>
+          <label className={lbl}>출발지 (근무지)</label>
+          <input className={inp} type="text" value={s.origin}
+            placeholder="기본값: 소속부서와 동일 (수정 가능)"
+            onChange={e => upd({ origin: e.target.value })}/>
           <label className={lbl}>성명</label>
           <input className={inp} type="text" value={s.name}
             placeholder="성명을 입력하세요"
@@ -289,7 +297,7 @@ export default function RouteA() {
           {s.grade && <div className={ibox}>A경로(근무지 내 출장)는 일비(정액)만 지급됩니다. 전 직급 동일 기준입니다.</div>}
         </div>
         <div className="flex justify-end gap-3 mt-5">
-          <Btn primary disabled={!s.name.trim()||!s.grade} onClick={() => upd({ step: 1 })}>다음 →</Btn>
+          <Btn primary disabled={!s.dept.trim()||!s.name.trim()||!s.grade} onClick={() => upd({ step: 1 })}>다음 →</Btn>
         </div>
       </>}
 

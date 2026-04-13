@@ -249,7 +249,7 @@ const NightRow=({n,num,date,limit,upd})=>{
 };
 
 /* ── 초기 상태 & 상수 ── */
-const iS=()=>({name:"",grade:"",trainingName:"",trainingOrg:"",trainingRegion:"",startDate:"",startTime:"09:00",endDate:"",endTime:"18:00",isResidence:null,hasComp:null,companions:[{name:"",grade:""}],policy:"",policyNote:"",policyBasis:"",inbound:eT(),outbound:eT(),nights:[],dayData:[]});
+const iS=()=>({dept:"",origin:"",name:"",grade:"",trainingName:"",trainingOrg:"",trainingRegion:"",startDate:"",startTime:"09:00",endDate:"",endTime:"18:00",isResidence:null,hasComp:null,companions:[{name:"",grade:""}],policy:"",policyNote:"",policyBasis:"",inbound:eT(),outbound:eT(),nights:[],dayData:[]});
 const PS=["기본정보","지급방침","교통·숙박","일비·식비","감액조정","완료·저장"];
 const PN=["기본정보","지급방침","완료·저장"];
 
@@ -409,7 +409,7 @@ function gHTML(s, adjs, imgs){
   const body =
     "<h1>국내 연수 여비 정산 보고서</h1>"
     +"<table><tr><th>항목</th><th>내용</th></tr>"
-    +"<tr><td class=g>신청자</td><td><b>"+(s.name||"-")+" ("+s.grade+")</b></td></tr>"
+    +"<tr><td class=g>소속부서</td><td>"+(s.dept||"-")+"</td></tr><tr><td class=g>신청자</td><td><b>"+(s.name||"-")+" ("+s.grade+")</b></td></tr>"
     +"<tr><td class=g>연수명</td><td>"+(s.trainingName||"-")+"</td></tr>"
     +"<tr><td class=g>기관·지역</td><td>"+(s.trainingOrg||"-")+" / "+(s.trainingRegion||"-")+"</td></tr>"
     +"<tr><td class=g>기간</td><td><b>"+(s.startDate||"").replace(/-/g,".")+" "+(s.startTime||"")+" ~ "+(s.endDate||"").replace(/-/g,".")+" "+(s.endTime||"")+"</b></td></tr>"
@@ -537,6 +537,12 @@ export default function RouteC(){
       {step===0&&<>
         <div className={card}>
           <div className={ct}>신청자 정보</div>
+          <div className={lbl0}>소속부서(팀)</div>
+          <input className={inp} type="text" value={s.dept||""} placeholder="예) 대구센터 창업지원팀"
+            onChange={e=>upd({dept:e.target.value, origin:e.target.value})}/>
+          <div className={lbl}>출발지 (근무지)</div>
+          <input className={inp} type="text" value={s.origin||""} placeholder="기본값: 소속부서와 동일 (수정 가능)"
+            onChange={e=>upd({origin:e.target.value})}/>
           <div className={lbl0}>성명</div>
           <input className={inp} type="text" value={s.name} placeholder="성명을 입력하세요" onChange={e=>upd({name:e.target.value})}/>
           <div className={lbl}>직급</div>
