@@ -434,10 +434,11 @@ function gHTML(s, adjs, imgs){
     +"<div class=dl>⏰ 정산 마감: "+dlS+" / 제10조의2</div>";
   return "<!DOCTYPE html><html lang=ko><head><meta charset=UTF-8><title>연수 여비 정산 보고서</title><style>"+css+"</style></head><body>"+body+
     (Object.keys(imgs).length > 0 ?
+      "<div style='page-break-before:always;padding:20px'><h1>첨부 증빙 자료</h1><div style='display:grid;grid-template-columns:1fr 1fr;gap:12px'>" +
       Object.entries(imgs).filter(([k,v])=>v).map(([k,v])=>{
         const labels={"confirm":"연수 확인서","transport":"교통비 영수증","accom":"숙박비 영수증","etc":"기타 증빙"};
-        return "<div style=\'page-break-before:always;padding:20px\'><h1 style=\'font-size:16px;margin-bottom:16px\'>"+labels[k]+"</h1><img src=\'"+v.base64+"\' style=\'width:100%;max-height:600px;object-fit:contain\'/></div>";
-      }).join("") : "")+"</body></html>";
+        return "<div style='border:1px solid #e5e7eb;border-radius:6px;padding:8px'><div style='font-size:12px;font-weight:600;margin-bottom:6px'>"+labels[k]+"</div><img src='"+v.base64+"' style='width:100%;max-height:320px;object-fit:contain'/></div>";
+      }).join("") + "</div></div>" : "")+"</body></html>";
 }
 
 

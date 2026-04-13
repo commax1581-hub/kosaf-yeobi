@@ -321,7 +321,7 @@ export default function RouteB4() {
             </div>
           ) : (
             <div className={obox + " mb-4"}>
-              차량(관용차·자가용) 이용 구간 없음 — 전일 정상 지급
+              관용차 이용 구간 없음 — 전일 정상 지급
             </div>
           )}
 
