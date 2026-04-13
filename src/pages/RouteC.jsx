@@ -395,7 +395,7 @@ function gHTML(s, adjs, imgs){
   const totalD = adjs.reduce((sm,a)=>sm+(a.deduct||0),0);
   const totP = pIn+pOut+aC+dT+mT-totalD;
   const pL = s.policy==="none"?"전액 미지급":s.policy==="partial"?"일부 지급":"전액 지급";
-  const css = "body{font-family:sans-serif;font-size:13px;margin:20px}h1{border-bottom:2px solid #7c3aed;padding-bottom:6px;margin-bottom:10px}h2{color:#7c3aed;margin:10px 0 3px}table{width:100%;border-collapse:collapse;margin-bottom:8px}th{background:#7c3aed;color:#fff;padding:5px 7px;text-align:left}td{padding:4px 7px;border-bottom:1px solid #e5e7eb}tr.h td{background:#f5f3ff;font-weight:600}.b{color:#1d4ed8;font-weight:600}.g{color:#888}.sum{background:#f5f3ff;border:2px solid #7c3aed;padding:10px;margin:8px 0;border-radius:6px}.r{display:flex;justify-content:space-between;padding:3px 0}.rf{border-top:1px solid #7c3aed;margin-top:5px;padding-top:5px;font-size:15px;font-weight:700;color:#4c1d95}.dl{background:#fef9c3;border:1px solid #fcd34d;padding:6px;font-size:11px;margin-top:8px;border-radius:4px}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}";
+  const css = "@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');body{font-family:'Noto Sans KR',sans-serif;font-size:13px;margin:20px}h1{border-bottom:2px solid #333;padding-bottom:6px;margin-bottom:10px;color:#111}h2{color:#333;margin:10px 0 3px;font-weight:700}table{width:100%;border-collapse:collapse;margin-bottom:8px}th{background:#333;color:#fff;padding:5px 7px;text-align:left;font-weight:500}td{padding:4px 7px;border-bottom:1px solid #ddd}tr.h td{background:#f5f5f5;font-weight:600}.b{color:#111;font-weight:700}.g{color:#666}.sum{background:#f5f5f5;border:2px solid #333;padding:10px;margin:8px 0;border-radius:4px}.r{display:flex;justify-content:space-between;padding:3px 0}.rf{border-top:2px solid #111;margin-top:5px;padding-top:5px;font-size:15px;font-weight:700;color:#111}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}";
   const dRows = (s.dayData||[]).map(d=>{
     const b=bdAmt(d,s.isResidence),da=d.dayDeduct?Math.round(b/2):b;
     const cnt=[d.b,d.l,d.d].filter(Boolean).length;
@@ -431,7 +431,7 @@ function gHTML(s, adjs, imgs){
         +(totalD>0?"<div class=r><span class=g>AI 산출 개인지급</span><span>"+W(pIn+pOut+aC+dT+mT)+"</span></div><div class=r><span style=color:#92400e>감액</span><span style=color:#dc2626>−"+W(totalD)+"</span></div>":"")
         +"<div class='r rf'><span>최종 개인 청구액</span><span>"+W(totP)+"</span></div></div>"
       :"<div class=sum><div style=font-weight:700;color:#991b1b;margin-bottom:4px>여비 지급 없음 — 전액 미지급</div><div style=font-size:12px>근거: "+(s.policyBasis||"")+"</div></div>")
-    +"<div class=dl>⏰ 정산 마감: "+dlS+" / 제10조의2</div>";
+    ;
   return "<!DOCTYPE html><html lang=ko><head><meta charset=UTF-8><title>연수 여비 정산 보고서</title><style>"+css+"</style></head><body>"+body+
     (Object.keys(imgs).length > 0 ?
       "<div style='page-break-before:always;padding:20px'><h1>첨부 증빙 자료</h1><div style='display:grid;grid-template-columns:1fr 1fr;gap:12px'>" +
