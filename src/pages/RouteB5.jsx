@@ -261,6 +261,10 @@ export default function RouteB5(){
   const [extraImgs,setExtraImgs]=useState([]);
   const [loadingKey,setLoadingKey]=useState(null);
   const [adjustments,setAdjustments]=useState([]);
+  const [saved,setSaved]=useState(false);
+  const [reportHTML,setReportHTML]=useState(null);
+  const [pdfDone,setPdfDone]=useState(false);
+  const loadRef=useRef();
 
   /* ── B4에서 진입 시 자동 로드 ── */
   useEffect(() => {
@@ -274,10 +278,6 @@ export default function RouteB5(){
       setScreen("main");
     }
   }, []);
-  const [saved,setSaved]=useState(false);
-  const [reportHTML,setReportHTML]=useState(null);
-  const [pdfDone,setPdfDone]=useState(false);
-  const loadRef=useRef();
 
   /* ── 브라우저 닫기 경고 ── */
   useEffect(() => {
