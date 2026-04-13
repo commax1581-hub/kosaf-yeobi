@@ -59,7 +59,7 @@ function buildDays(startDate, endDate) {
 function detectVehicleDays(transport) {
   const hasGov = transport.some(t => t.type === "gov");
   const hasCar = transport.some(t => t.type === "car");
-  return { hasGov, hasCar, hasVehicle: hasGov || hasCar };
+  return { hasGov, hasCar, hasVehicle: hasGov }; // 자가용은 일비 감액 미적용
 }
 
 /* ── 초기 일별 데이터 ── */
@@ -314,8 +314,7 @@ export default function RouteB4() {
               <div className="font-medium mb-1">⚠️ 차량 이용 구간 있음 — 일비 감액 확인 필요</div>
               <div className="text-xs space-y-1">
                 {hasGov && <div>• 업무용차량(관용차) 이용 구간: 해당 일 일비 1/2 감액 (제14조)</div>}
-                {hasCar && <div>• 자가용 이용 구간: 해당 일 일비 1/2 감액 (제14조 취지 준용)</div>}
-              </div>
+                          </div>
               <div className="mt-2 text-xs font-medium">
                 아래에서 차량 이용한 날을 확인·수정하세요.
               </div>

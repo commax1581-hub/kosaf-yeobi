@@ -254,6 +254,18 @@ const ReportOverlay = ({html, fileName, onClose}) => {
 
 export default function RouteB5(){
   const navigate = useNavigate();
+  /* ── B4에서 진입 시 자동 로드 ── */
+  useEffect(() => {
+    const loaded = loadFromStorage();
+    if (loaded) {
+      setData(loaded);
+      setAdjustments([]);
+      setImages({});
+      setExtraImgs([]);
+      setStep(0);
+      setScreen("main");
+    }
+  }, []);
   const [screen,setScreen]=useState("start");
   const [step,setStep]=useState(0);
   const [data,setData]=useState(SAMPLE);
