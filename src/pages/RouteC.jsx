@@ -359,13 +359,13 @@ const mkN = (s, ext) => {
 
 /* ── 저장·메일 ── */
 function sData(s){
-  const b=new Blob([JSON.stringify({v:"1c",t:new Date().toISOString(),d:s},null,2)],{type:"application/json"});
+  const b=new Blob([JSON.stringify({v:"C",t:new Date().toISOString(),d:s},null,2)],{type:"application/json"});
   const u=URL.createObjectURL(b);const a=document.createElement("a");
   a.href=u;a.download=mkN(s,"json");document.body.appendChild(a);a.click();
   document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(u),500);
 }
 function sDataAdj(s,adjs){
-  const b=new Blob([JSON.stringify({v:"1c",t:new Date().toISOString(),d:s,adjustments:adjs},null,2)],{type:"application/json"});
+  const b=new Blob([JSON.stringify({v:"C",t:new Date().toISOString(),d:s,adjustments:adjs},null,2)],{type:"application/json"});
   const u=URL.createObjectURL(b);const a=document.createElement("a");
   a.href=u;a.download=mkN(s,"json");document.body.appendChild(a);a.click();
   document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(u),500);
@@ -468,6 +468,23 @@ export default function RouteC(){
   const [images,setImages]=useState({});
   const [loadingImg,setLoadingImg]=useState({});
   const [saved,setSaved]=useState(false);
+
+  /* ── JSON 불러오기 (sessionStorage) ── */
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("kosaf_json_load");
+      if (raw) {
+        const j = JSON.parse(raw);
+        sessionStorage.removeItem("kosaf_json_load");
+        if (j.v === "C" && j.d) {
+          setS(prev => ({...prev, ...j.d}));
+          if (j.adjustments) setAdjs(j.adjustments);
+          setStep(0);
+        }
+      }
+    } catch(e) {}
+  }, []);
+
   const [reportHTML,setReportHTML]=useState(null);
   const [printed,setPrinted]=useState(false);
   const [adjustments,setAdjs]=useState([]); // [{key,orig,deduct,reason}]

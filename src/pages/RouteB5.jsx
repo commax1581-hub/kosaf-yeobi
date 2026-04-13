@@ -99,7 +99,14 @@ function mkName(data,ext,type){
 
 /* ── JSON 저장 ── */
 function saveJSON(data,amounts,adjustments,checks,type){
-  const blob=new Blob([JSON.stringify({version:"1.0",savedAt:new Date().toISOString(),type,data,amounts,adjustments,checks},null,2)],{type:"application/json"});
+  const blob=new Blob([JSON.stringify({v:"B",version:"1.0",savedAt:new Date().toISOString(),type,data,amounts,adjustments,checks,
+      steps:{
+        b_step1: (() => { try { return JSON.parse(localStorage.getItem("b_step1")||"null"); } catch{return null;} })(),
+        b_step2: (() => { try { return JSON.parse(localStorage.getItem("b_step2")||"null"); } catch{return null;} })(),
+        b_step3: (() => { try { return JSON.parse(localStorage.getItem("b_step3")||"null"); } catch{return null;} })(),
+        b_step4: (() => { try { return JSON.parse(localStorage.getItem("b_step4")||"null"); } catch{return null;} })(),
+      }
+    },null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
   a.href=url;a.download=mkName(data,"json",type);
@@ -316,8 +323,21 @@ export default function RouteB5(){
   const [pdfDone,setPdfDone]=useState(false);
   const loadRef=useRef();
 
-  /* ── B4에서 진입 시 자동 로드 ── */
+  /* ── B4에서 진입 or JSON 불러오기 ── */
   useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("kosaf_json_load");
+      if (raw) {
+        const j = JSON.parse(raw);
+        sessionStorage.removeItem("kosaf_json_load");
+        if (j.v === "B" && j.data) {
+          setData(j.data);
+          setAdjustments(j.adjustments||[]);
+          setImages({});setExtraImgs([]);setStep(0);setScreen("main");
+          return;
+        }
+      }
+    } catch(e) {}
     const loaded = loadFromStorage();
     if (loaded) {
       setData(loaded);

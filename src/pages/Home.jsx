@@ -76,14 +76,24 @@ export default function Home() {
     setLoadedData(null);
     loadJSON(file,
       data => {
-        const v = (data.v||"").charAt(0).toUpperCase();
-        const name = (data.d&&data.d.name) || "-";
-        const date = (data.d&&data.d.startDate) || "";
+        const v = data.v || "";
+        const name = (data.d&&data.d.name) || (data.data&&data.data.name) || "-";
+        const date = (data.d&&data.d.startDate) || (data.data&&data.data.startDate) || "";
         setLoadedData({ v, name, date, raw: data });
+        /* 경로 판별 후 자동 이동 */
+        /* B경로: steps 있으면 /b/1로, 없으면 /b/5로 */
+        const hasBSteps = v==="B" && data.steps && data.steps.b_step1;
+        const dest = v==="A"?"/a": v==="B"?(hasBSteps?"/b/1":"/b/5"): v==="C"?"/c": null;
+        if (dest) {
+          sessionStorage.setItem("kosaf_json_load", JSON.stringify(data));
+          setTimeout(() => navigate(dest), 100);
+        } else {
+          setLoadMsg("경로를 알 수 없는 파일입니다. (A/B/C 경로 파일만 지원)");
+        }
       },
       err => setLoadMsg(err)
     );
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="max-w-lg mx-auto p-4 pb-4" style={{background:"#f0f4ff", minHeight:"100vh"}}>

@@ -206,6 +206,19 @@ const ReportOverlay = ({html, fileName, onClose}) => {
 
 export default function RouteA() {
   const navigate = useNavigate()
+
+  /* ── JSON 불러오기 (sessionStorage) ── */
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("kosaf_json_load");
+      if (raw) {
+        const j = JSON.parse(raw);
+        sessionStorage.removeItem("kosaf_json_load");
+        if (j.v === "A" && j.d) { setS(s => ({...s, ...j.d})); }
+      }
+    } catch(e) {}
+  }, []);
+
   const [s, setS] = useState(init());
   const [reportHTML, setReportHTML] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -557,7 +570,7 @@ export default function RouteA() {
           <button className={"w-full border-2 rounded-xl p-4 text-left cursor-pointer "+(saved?"border-green-200 bg-green-50/30":"border-gray-300 hover:bg-gray-50")}
             onClick={()=>{
               try {
-                const blob = new Blob([JSON.stringify({v:"1a",t:new Date().toISOString(),d:s},null,2)],{type:"application/json"});
+                const blob = new Blob([JSON.stringify({v:"A",t:new Date().toISOString(),d:s},null,2)],{type:"application/json"});
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
