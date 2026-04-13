@@ -100,9 +100,9 @@ const TollParkUI = ({ label, hasKey, amtKey, cardKey, reasonKey, si, t, updT }) 
 
 /* ── 샘플 이전 데이터 (1단계에서 전달) ── */
 /* ── 구간 목록 생성 ── */
-function buildSegs(routes) {
-  const origin = PREV.origin || PREV.dept || "출발지";
-  const pts = [origin, ...routes.map(r => `${r.region} ${r.place}`), origin];
+function buildSegs(routes, origin) {
+  const o = origin || "출발지";
+  const pts = [o, ...routes.map(r => `${r.region} ${r.place}`), o];
   return pts.slice(0, -1).map((from, i) => ({ from, to: pts[i + 1], idx: i }));
 }
 
@@ -199,11 +199,11 @@ export default function RouteB2() {
   };
   const _isFromStorage1 = !!_raw1;
 
-  const [ts, setTs] = useState(buildSegs(PREV.routes).map(() => emptyT()));
+  const [ts, setTs] = useState(buildSegs(PREV.routes, PREV.origin || PREV.dept).map(() => emptyT()));
   const [cur, setCur] = useState(0);
   const [showSummary, setShowSummary] = useState(false);
 
-  const segs = buildSegs(PREV.routes);
+  const segs = buildSegs(PREV.routes, PREV.origin || PREV.dept);
   const eg = effGrade(PREV.grade, PREV.hasComp, PREV.companions);
   const companions = PREV.companions;
 
