@@ -145,7 +145,6 @@ const TransportForm=({t,seg,startDate,upd,eg})=>{
 
       {/* 자가용 */}
       {t.type==="car"&&<>
-        <div className={wbox+" mt-3 text-xs"}>자가용 이용 시 일비 1/2 감액 (제14조 취지 준용)</div>
         <div className={lbl0}>정산 방식</div>
         <div className="flex gap-2 mt-1">
           <TB sel={t.carMode==="public"} onClick={()=>upd({carMode:"public"})}>대중교통준용</TB>
@@ -725,7 +724,7 @@ export default function RouteC(){
                   <span className="text-xs text-gray-500">기준 일비: {fmtW(base)}</span>
                   <label className="flex items-center gap-1.5 cursor-pointer">
                     <input type="checkbox" checked={d.dayDeduct} onChange={e=>updD(di,{dayDeduct:e.target.checked})} className="w-4 h-4 accent-purple-500"/>
-                    <span className="text-xs text-purple-600">차량 이용 1/2 감액</span>
+                    
                   </label>
                 </div>}
                 {base===0&&<div className="text-xs text-gray-400 mb-2">합숙 중간일 — 일비 미지급</div>}

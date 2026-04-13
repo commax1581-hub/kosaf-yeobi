@@ -254,6 +254,14 @@ const ReportOverlay = ({html, fileName, onClose}) => {
 
 export default function RouteB5(){
   const navigate = useNavigate();
+  const [screen,setScreen]=useState("start");
+  const [step,setStep]=useState(0);
+  const [data,setData]=useState(SAMPLE);
+  const [images,setImages]=useState({});
+  const [extraImgs,setExtraImgs]=useState([]);
+  const [loadingKey,setLoadingKey]=useState(null);
+  const [adjustments,setAdjustments]=useState([]);
+
   /* ── B4에서 진입 시 자동 로드 ── */
   useEffect(() => {
     const loaded = loadFromStorage();
@@ -266,13 +274,6 @@ export default function RouteB5(){
       setScreen("main");
     }
   }, []);
-  const [screen,setScreen]=useState("start");
-  const [step,setStep]=useState(0);
-  const [data,setData]=useState(SAMPLE);
-  const [images,setImages]=useState({});
-  const [extraImgs,setExtraImgs]=useState([]);
-  const [loadingKey,setLoadingKey]=useState(null);
-  const [adjustments,setAdjustments]=useState([]);
   const [saved,setSaved]=useState(false);
   const [reportHTML,setReportHTML]=useState(null);
   const [pdfDone,setPdfDone]=useState(false);

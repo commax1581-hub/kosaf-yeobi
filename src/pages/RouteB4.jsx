@@ -113,7 +113,7 @@ const DayRow = ({ d, onUpdate, showMeal, showDay }) => {
       {/* 일비 감액 */}
       {showDay && (
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500">차량 이용으로 일비 1/2 감액</span>
+          <span className="text-xs text-gray-500">관용차 이용 — 일비 1/2 감액 (제14조)</span>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={d.dayDeduct}
               onChange={e => onUpdate({ dayDeduct: e.target.checked })}

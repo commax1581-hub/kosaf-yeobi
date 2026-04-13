@@ -245,7 +245,7 @@ export default function RouteB2() {
           else rows.push({ label: "주차료", corp: 0, personal: parseInt(t.parking), note: "개인/현금" });
         }
       }
-      rows.push({ label: "일비", corp: 0, personal: 0, note: "1/2 감액 (제14조 취지 준용)", deduct: true });
+      rows.push({ label: "일비", corp: 0, personal: 0, note: "", deduct: false });
     } else {
       const fare = parseInt(t.fare) || 0;
       if (t.cardType === "corp") rows.push({ label: "운임", corp: fare, personal: 0, note: "법인카드" });
@@ -323,7 +323,7 @@ export default function RouteB2() {
                     <div className="text-right">
                       {r.corp > 0 && <span className="text-gray-400 mr-2">법카 {fmtW(r.corp)}</span>}
                       {r.personal > 0 && <span className="text-blue-600 font-medium">개인 {fmtW(r.personal)}</span>}
-                      {r.deduct && <span className="text-amber-600">1/2 감액</span>}
+                      
                       {r.corp === 0 && r.personal === 0 && !r.deduct && <span className="text-gray-400">0원</span>}
                     </div>
                   </div>
@@ -473,8 +473,6 @@ export default function RouteB2() {
 
             {/* 일비 감액 안내 */}
             <div className={wbox + " mb-4"}>
-              자가용 이용 시 일비 1/2 감액 적용<br />
-              <span className="text-xs opacity-80">(제14조 취지 준용 — 부수적 교통비 미발생)</span>
             </div>
 
             {/* 정산 방식 선택 */}
@@ -491,7 +489,7 @@ export default function RouteB2() {
             {/* 동승자 */}
             {PREV.hasComp && companions.length > 0 && <>
               <div className={lbl}>동승자 선택</div>
-              <div className="text-xs text-gray-400 mb-2">동승자: 운임 0원, 일비 1/2 감액 (제14조 취지 준용)</div>
+              <div className="text-xs text-gray-400 mb-2">동승자: 운임 0원</div>
               {companions.map((c, ci) => (
                 <label key={ci} className="flex items-center gap-2 py-2 cursor-pointer border-b border-gray-50">
                   <input type="checkbox"
