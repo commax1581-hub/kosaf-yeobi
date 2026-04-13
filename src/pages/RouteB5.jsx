@@ -140,10 +140,10 @@ function genHTML(data,cats,imgs,extra,amt,adjs){
     return rows.join("");
   };
 
-  const rI=cats.filter(c=>c.group==="route"&&imgs[c.key]).map(c=>({label:c.label,img:imgs[c.key]}));
-  const pI=cats.filter(c=>c.group==="p"&&imgs[c.key]).map(c=>({label:c.label,img:imgs[c.key]}));
-  const rR=cats.filter(c=>c.group==="r"&&imgs[c.key]).map(c=>({label:c.label,img:imgs[c.key]}));
-  const xI=(extra||[]).filter(e=>e.img).map(e=>({label:e.name||"추가증빙",img:e.img}));
+  const rI=cats.filter(c=>c.group==="route"&&imgs[c.key]&&imgs[c.key].base64).map(c=>({label:c.label,img:imgs[c.key]}));
+  const pI=cats.filter(c=>c.group==="proof"&&imgs[c.key]&&imgs[c.key].base64).map(c=>({label:c.label,img:imgs[c.key]}));
+  const rR=cats.filter(c=>c.group==="receipt"&&imgs[c.key]&&imgs[c.key].base64).map(c=>({label:c.label,img:imgs[c.key]}));
+  const xI=(extra||[]).filter(e=>e.img&&e.img.base64).map(e=>({label:e.name||"추가증빙",img:e.img}));
 
   return "<!DOCTYPE html><html lang=ko><head><meta charset=UTF-8><title>국내 출장비 정산 보고서</title><style>"+css+"</style></head><body>"
     +"<h1>국내 출장비 정산 보고서</h1>"

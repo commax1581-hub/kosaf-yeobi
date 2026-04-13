@@ -411,7 +411,7 @@ function gHTML(s, adjs, imgs){
 
   const imgSection = Object.keys(imgs).length > 0 ?
     "<div class=pg><h2>첨부 증빙자료</h2><div class=g4>" +
-    Object.entries(imgs).filter(([k,v])=>v).map(([k,v])=>{
+    Object.entries(imgs).filter(([k,v])=>v&&v.base64).map(([k,v])=>{
       const labels={"confirm":"연수 확인서","transport":"교통비 영수증","accom":"숙박비 영수증","etc":"기타 증빙"};
       return "<div class=gi><div class=gl>" +labels[k]+ "</div><img src='"+v.base64+"' style='width:100%;max-height:320px;object-fit:contain'/></div>";
     }).join("") + "</div></div>"
