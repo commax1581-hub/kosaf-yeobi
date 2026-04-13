@@ -51,42 +51,44 @@ function genHTML(s){
   const h=calcH(s),res=calcR(s);
   const totalD=(s.adjustments||[]).reduce((sm,a)=>sm+(a.deduct||0),0);
   const fin=Math.max(0,res.tot-totalD);
-  const dl=new Date(s.ed);dl.setDate(dl.getDate()+8);
-  const dlS=dl.toISOString().slice(0,10).replace(/-/g,".");
   const W2=n=>Math.round(n||0).toLocaleString("ko-KR")+"원";
   const dests=(s.dests||[]).filter(d=>d.p).map((d,i)=>"<tr><td class=g>"+(i+1)+"</td><td>"+d.p+(d.r?" ("+d.r+")":"")+"</td></tr>").join("");
-  const comps=(s.comp&&s.comps.filter(c=>c.n).length)?s.comps.filter(c=>c.n).map(c=>"<tr><td class=g>동행자</td><td>"+c.n+" ("+c.g+")</td></tr>").join(""):"<tr><td colspan=2 class=g>없음</td></tr>";
+  const compsStr=(s.comp&&s.comps.filter(c=>c.n).length)?s.comps.filter(c=>c.n).map(c=>c.n+" ("+c.g+")").join(", "):"없음";
   const svcT=!s.svcT||s.svcT==="none"?"미이용":s.svcT==="oneway"?"편도 1회 −5,000원 (제15조⑤)":"왕복 2회 −10,000원 (제15조⑤)";
   const adjItems=(s.adjustments||[]).filter(a=>a.deduct>0&&a.reason);
-  const adjTable=adjItems.length?"<h2>감액 조정</h2><table><tr><th>항목</th><th>산출값</th><th>감액</th><th>최종값</th><th>사유</th></tr>"+adjItems.map(a=>"<tr><td>"+a.key+"</td><td>"+W2(a.orig)+"</td><td style=color:#dc2626>−"+W2(a.deduct)+"</td><td style=font-weight:600>"+W2(a.orig-a.deduct)+"</td><td>"+a.reason+"</td></tr>").join("")+"</table>":"";
-  const chkRows=runChecks(s).map(c=>"<div style='display:flex;gap:8px;padding:4px 0;font-size:12px'><span>"+(c.ok===true?"✅":c.ok===null?"ℹ️":"⚠️")+"</span><span>"+c.msg+"</span></div>").join("");
-  const css="body{font-family:sans-serif;font-size:13px;margin:20px}h1{border-bottom:2px solid #2563eb;padding-bottom:6px;margin-bottom:10px}h2{color:#2563eb;margin:12px 0 4px}table{width:100%;border-collapse:collapse;margin-bottom:10px}th{background:#2563eb;color:#fff;padding:5px 7px;text-align:left}td{padding:4px 7px;border-bottom:1px solid #e5e7eb}tr.h td{background:#eff6ff;font-weight:600}.b{color:#1d4ed8;font-weight:600}.g{color:#888}.sum{background:#eff6ff;border:2px solid #2563eb;padding:10px;margin:8px 0;border-radius:6px}.r{display:flex;justify-content:space-between;padding:3px 0}.rf{border-top:1px solid #2563eb;margin-top:5px;padding-top:5px;font-size:15px;font-weight:700;color:#1d4ed8}.dl{background:#fef9c3;border:1px solid #fcd34d;padding:6px;font-size:11px;margin-top:8px;border-radius:4px}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}";
-  return "<!DOCTYPE html><html lang=ko><head><meta charset=UTF-8><title>출장비 정산 보고서 (A경로)</title><style>"+css+"</style></head><body>"
-    +"<h1>국내 출장비 정산 보고서 (A경로 — 근무지 내 출장)</h1>"
+  const adjTable=adjItems.length?"<h2>나-4. 감액 조정</h2><table><tr><th>항목</th><th>산출값</th><th>감액</th><th>최종값</th><th>사유</th></tr>"+adjItems.map(a=>"<tr><td>"+a.key+"</td><td>"+W2(a.orig)+"</td><td style=color:#333;font-weight:600>−"+W2(a.deduct)+"</td><td style=font-weight:700>"+W2(a.orig-a.deduct)+"</td><td>"+a.reason+"</td></tr>").join("")+"</table>":"";
+  const css="@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');body{font-family:'Noto Sans KR',sans-serif;font-size:13px;margin:24px}h1{font-size:17px;font-weight:700;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:16px;color:#111}h2{font-size:13px;font-weight:700;color:#111;background:#f0f0f0;padding:4px 8px;margin:14px 0 4px;border-left:3px solid #333}table{width:100%;border-collapse:collapse;margin-bottom:8px}th{background:#333;color:#fff;padding:5px 8px;text-align:left;font-weight:500;font-size:12px}td{padding:5px 8px;border-bottom:1px solid #ddd}.g{color:#666;font-size:12px}.b{font-weight:700;color:#111}.sum{border:2px solid #111;padding:12px;margin:12px 0;background:#f8f8f8}.r{display:flex;justify-content:space-between;padding:3px 0;font-size:13px}.rf{border-top:2px solid #111;margin-top:8px;padding-top:8px;font-size:16px;font-weight:700}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}";
+  return "<!DOCTYPE html><html lang=ko><head><meta charset=UTF-8><title>근무지 내 출장 여비 정산</title><style>"+css+"</style></head><body>"
+    +"<h1>근무지 내 출장 여비 정산 보고서</h1>"
+    +"<h2>가. 출장 기본정보</h2>"
     +"<table><tr><th>항목</th><th>내용</th></tr>"
-    +"<tr><td class=g>신청자</td><td><b>"+(s.name||"-")+" ("+s.grade+")</b></td></tr>"
-    +"<tr><td class=g>출장 일시</td><td><b>"+(s.sd||"").replace(/-/g,".")+" "+s.st+" ~ "+(s.ed||"").replace(/-/g,".")+" "+s.et+"</b></td></tr>"
-    +"<tr><td class=g>소요 시간</td><td>"+fmtH(h)+" ("+( h>=4?"4시간 이상":"4시간 미만")+")</td></tr>"
-    +"<tr><td class=g>관용차 이용</td><td>"+(s.gov?"이용 — 미지급 (제13조)":"미이용")+"</td></tr>"
-    +"<tr><td class=g>차량운행지원</td><td>"+svcT+"</td></tr>"
+    +"<tr><td class=g>소속부서</td><td>"+(s.dept||"—")+"</td></tr>"
+    +"<tr><td class=g>신청자</td><td><b>"+(s.name||"—")+" ("+s.grade+")</b></td></tr>"
+    +"<tr><td class=g>출장 일시</td><td>"+(s.sd||"").replace(/-/g,".")+" "+s.st+" ~ "+(s.ed||"").replace(/-/g,".")+" "+s.et+"</td></tr>"
+    +"<tr><td class=g>소요 시간</td><td>"+fmtH(h)+" ("+(h>=4?"4시간 이상":"4시간 미만")+")</td></tr>"
     +"<tr><td class=g>출장 사유</td><td>"+(s.reason||"(미입력)")+"</td></tr>"
+    +"<tr><td class=g>동행자</td><td>"+compsStr+"</td></tr>"
+    +"<tr><td class=g>관용차 이용</td><td>"+(s.gov?"이용 (제13조 — 일비 미지급)":"미이용")+"</td></tr>"
     +"</table>"
-    +"<h2>출장지</h2><table><tr><th>번호</th><th>장소 및 사유</th></tr>"+dests+"</table>"
-    +"<h2>동행자</h2><table><tr><th>구분</th><th>성명 (직급)</th></tr>"+comps+"</table>"
-    +"<h2>계산 내역</h2><table><tr><th>항목</th><th>내용</th><th>금액</th></tr>"
-    +"<tr><td>기본 지급액</td><td>"+(h>=4?"4시간 이상":"4시간 미만")+" (제16조①)</td><td class=b>"+W2(res.base)+"</td></tr>"
-    +(res.svc>0?"<tr><td>서비스 차감</td><td>"+svcT+"</td><td style=color:#dc2626>−"+W2(res.svc)+"</td></tr>":"")
-    +"<tr class=h><td colspan=2>규정 계산액</td><td class=b>"+W2(res.tot)+"</td></tr>"
+    +"<h2>가-1. 출장지</h2>"
+    +"<table><tr><th>번호</th><th>장소 및 사유</th></tr>"+dests+"</table>"
+    +"<h2>나. 비용항목 정산</h2>"
+    +"<h2>나-1. 일비 계산  (여비규칙 제16조, 별표1)</h2>"
+    +"<table><tr><th>구분</th><th>산정 기준</th><th>금액</th></tr>"
+    +"<tr><td>일비 (정액)</td><td>"+(h>=4?"4시간 이상 — 20,000원":"4시간 미만 — 10,000원")+"</td><td class=b>"+W2(res.base)+"</td></tr>"
+    +(res.svc>0?"<tr><td>차량운행지원 차감</td><td>"+svcT+"</td><td style=font-weight:600>−"+W2(res.svc)+"</td></tr>":"")
+    +"<tr style=background:#f0f0f0><td colspan=2><b>일비 소계</b></td><td class=b>"+W2(res.tot)+"</td></tr>"
     +"</table>"
     +adjTable
-    +"<div class=sum><div style=font-weight:700;margin-bottom:8px>정산 최종 요약</div>"
-    +(totalD>0?"<div class=r><span class=g>AI 산출 개인지급</span><span>"+W2(res.tot)+"</span></div><div class=r><span style=color:#92400e>감액</span><span style=color:#dc2626>−"+W2(totalD)+"</span></div>":"")
-    +"<div class='r rf'><span>최종 개인 지급액</span><span>"+W2(fin)+"</span></div>"
-    +"<div class=r><span class=g>법인카드 집행액</span><span>0원 (해당없음)</span></div></div>"
-    +"<h2>검증 결과</h2>"+chkRows
-    +"<div class=dl>⏰ 정산 마감: "+dlS+" (종료 후 7일 이내 / 제10조의2)</div>"
+    +"<h2>다. 최종 정산 금액</h2>"
+    +"<div class=sum>"
+    +(totalD>0?"<div class=r><span>산출 지급액</span><span>"+W2(res.tot)+"</span></div><div class=r><span>감액</span><span style=font-weight:700>−"+W2(totalD)+"</span></div>":"")
+    +"<div class='r rf'><span>◆ 최종 개인 지급액</span><span>"+W2(fin)+"</span></div>"
+    +"<div class=r><span style=color:#666;font-size:12px>법인카드 집행</span><span style=color:#666;font-size:12px>0원 (해당없음)</span></div>"
+    +"</div>"
     +"</body></html>";
 }
+
 
 
 

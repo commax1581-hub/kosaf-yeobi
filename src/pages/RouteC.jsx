@@ -383,63 +383,81 @@ function gHTML(s, adjs, imgs){
   imgs = imgs || {};
   const W = n => Math.round(n||0).toLocaleString("ko-KR")+"원";
   const days = bldDays(s.startDate, s.endDate);
-  const dl = new Date(s.endDate||new Date()); dl.setDate(dl.getDate()+8);
-  const dlS = dl.toISOString().slice(0,10).replace(/-/g,".");
   const iF = (s.inbound?s.inbound.carMode:null)==="fuel" ? cFuel(s.inbound) : parseInt((s.inbound?s.inbound.carMode:null)==="public"?s.inbound.pubFare||0:(s.inbound?s.inbound.fare:0))||0;
   const oF = (s.outbound?s.outbound.carMode:null)==="fuel" ? cFuel(s.outbound) : parseInt((s.outbound?s.outbound.carMode:null)==="public"?s.outbound.pubFare||0:(s.outbound?s.outbound.fare:0))||0;
   const pIn = ((s.inbound?s.inbound.cardType:null)!=="corp"&&(s.inbound?s.inbound.cardType:null)!=="gov") ? iF : 0;
   const pOut = ((s.outbound?s.outbound.cardType:null)!=="corp"&&(s.outbound?s.outbound.cardType:null)!=="gov") ? oF : 0;
+  const cIn = ((s.inbound?s.inbound.cardType:null)==="corp") ? iF : 0;
+  const cOut = ((s.outbound?s.outbound.cardType:null)==="corp") ? oF : 0;
   const aC = (s.nights||[]).reduce((sm,n)=>sm+(n.type==="relative"?20000:parseInt(n.amount)||0),0);
   const dT = (s.dayData||[]).reduce((sm,d)=>{const b=bdAmt(d,s.isResidence);return sm+(d.dayDeduct?Math.round(b/2):b);},0);
   const mT = (s.dayData||[]).reduce((sm,d)=>sm+Math.max(0,25000-[d.b,d.l,d.d].filter(Boolean).length*MU),0);
   const totalD = adjs.reduce((sm,a)=>sm+(a.deduct||0),0);
   const totP = pIn+pOut+aC+dT+mT-totalD;
   const pL = s.policy==="none"?"전액 미지급":s.policy==="partial"?"일부 지급":"전액 지급";
-  const css = "@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');body{font-family:'Noto Sans KR',sans-serif;font-size:13px;margin:20px}h1{border-bottom:2px solid #333;padding-bottom:6px;margin-bottom:10px;color:#111}h2{color:#333;margin:10px 0 3px;font-weight:700}table{width:100%;border-collapse:collapse;margin-bottom:8px}th{background:#333;color:#fff;padding:5px 7px;text-align:left;font-weight:500}td{padding:4px 7px;border-bottom:1px solid #ddd}tr.h td{background:#f5f5f5;font-weight:600}.b{color:#111;font-weight:700}.g{color:#666}.sum{background:#f5f5f5;border:2px solid #333;padding:10px;margin:8px 0;border-radius:4px}.r{display:flex;justify-content:space-between;padding:3px 0}.rf{border-top:2px solid #111;margin-top:5px;padding-top:5px;font-size:15px;font-weight:700;color:#111}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}";
-  const dRows = (s.dayData||[]).map(d=>{
-    const b=bdAmt(d,s.isResidence),da=d.dayDeduct?Math.round(b/2):b;
-    const cnt=[d.b,d.l,d.d].filter(Boolean).length;
-    const dtype=d.isFirst?"입소일":d.isLast?"퇴소일":s.isResidence?"합숙중간일":"비합숙중간일";
-    return "<tr><td>"+d.dayNum+"일차 "+d.label+"</td><td>"+dtype+"</td><td class=b>"+W(da)+(d.dayDeduct?"(½)":"")+"</td><td class=b>"+W(Math.max(0,25000-cnt*MU))+(cnt?" ("+cnt+"식)":"")+"</td></tr>";
+
+  const css = "@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');body{font-family:'Noto Sans KR',sans-serif;font-size:13px;margin:24px}h1{font-size:17px;font-weight:700;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:16px;color:#111}h2{font-size:13px;font-weight:700;color:#111;background:#f0f0f0;padding:4px 8px;margin:14px 0 4px;border-left:3px solid #333}table{width:100%;border-collapse:collapse;margin-bottom:8px}th{background:#333;color:#fff;padding:5px 8px;text-align:left;font-weight:500;font-size:12px}td{padding:5px 8px;border-bottom:1px solid #ddd}.g{color:#666;font-size:12px}.b{font-weight:700}.sum{border:2px solid #111;padding:12px;margin:12px 0;background:#f8f8f8}.r{display:flex;justify-content:space-between;padding:3px 0;font-size:13px}.rf{border-top:2px solid #111;margin-top:8px;padding-top:8px;font-size:16px;font-weight:700}.pg{page-break-before:always;padding:20px}.g4{display:grid;grid-template-columns:1fr 1fr;gap:12px}.gi{border:1px solid #ddd;border-radius:4px;padding:8px}.gl{font-size:12px;font-weight:600;margin-bottom:6px}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}";
+
+  const travelDays = days.length;
+  const dayRows = (s.dayData||[]).map(d=>{
+    const c=[d.b,d.l,d.d].filter(Boolean).length;
+    const base=bdAmt(d,s.isResidence);
+    const da=d.dayDeduct?Math.round(base/2):base;
+    const ma=Math.max(0,25000-c*MU);
+    return "<tr><td>"+d.label+"</td><td>"+(d.dayDeduct?"관용차(½)":"정상")+"</td><td class=b>"+W(da)+"</td><td class=b>"+W(ma)+(c?" ("+c+"식)":"")+"</td></tr>";
   }).join("");
-  const nRows = s.isResidence?(s.nights||[]).map((n,ni)=>"<tr><td>"+(ni+1)+"박</td><td>"+(n.type==="hotel"?"일반":n.type==="relative"?"친지집":n.type==="provided"?"기관제공":"미숙박")+"</td><td class=g>"+(n.cardType==="corp"?W(parseInt(n.amount)||0):"—")+"</td><td class=b>"+(n.type==="relative"?W(20000):n.cardType!=="corp"?W(parseInt(n.amount)||0):"0원")+"</td></tr>").join(""):"";
-  const adjRows = adjs.filter(a=>a.deduct>0&&a.reason).map(a=>"<tr><td>"+a.key+"</td><td>"+W(a.orig)+"</td><td style=color:#dc2626>−"+W(a.deduct)+"</td><td style=font-weight:600>"+W(a.orig-a.deduct)+"</td><td>"+a.reason+"</td></tr>").join("");
-  const adjTable = adjRows?"<h2>감액 조정</h2><table><tr><th>항목</th><th>산출값</th><th>감액</th><th>최종값</th><th>사유</th></tr>"+adjRows+"</table>":"";
-  const compList = (s.companions||[]).filter(c=>c.name).map(c=>c.name+"("+c.grade+")").join(", ")||"없음";
-  const body =
-    "<h1>국내 연수 여비 정산 보고서</h1>"
+  const nightRows = (s.nights||[]).map((n,i)=>"<tr><td>"+(i+1)+"박</td><td>"+(n.type==="hotel"?"일반":n.type==="relative"?"친지집":n.type==="provided"?"기관제공":"미숙박")+"</td><td class=b>"+W(n.type==="relative"?20000:parseInt(n.amount)||0)+"</td></tr>").join("");
+  const adjRows = adjs.length?"<h2>나-4. 감액 조정</h2><table><tr><th>항목</th><th>산출값</th><th>감액</th><th>최종값</th><th>사유</th></tr>"+adjs.map(a=>"<tr><td>"+a.key+"</td><td>"+W(a.orig)+"</td><td style=font-weight:600>−"+W(a.deduct)+"</td><td class=b>"+W(a.orig-a.deduct)+"</td><td>"+a.reason+"</td></tr>").join("")+"</table>":"";
+
+  const imgSection = Object.keys(imgs).length > 0 ?
+    "<div class=pg><h2>첨부 증빙자료</h2><div class=g4>" +
+    Object.entries(imgs).filter(([k,v])=>v).map(([k,v])=>{
+      const labels={"confirm":"연수 확인서","transport":"교통비 영수증","accom":"숙박비 영수증","etc":"기타 증빙"};
+      return "<div class=gi><div class=gl>" +labels[k]+ "</div><img src='"+v.base64+"' style='width:100%;max-height:320px;object-fit:contain'/></div>";
+    }).join("") + "</div></div>"
+    : "";
+
+  return "<!DOCTYPE html><html lang=ko><head><meta charset=UTF-8><title>연수 여비 정산 보고서</title><style>"+css+"</style></head><body>"
+    +"<h1>연수 여비 정산 보고서</h1>"
+    +"<h2>가. 연수 기본정보</h2>"
     +"<table><tr><th>항목</th><th>내용</th></tr>"
-    +"<tr><td class=g>소속부서</td><td>"+(s.dept||"-")+"</td></tr><tr><td class=g>신청자</td><td><b>"+(s.name||"-")+" ("+s.grade+")</b></td></tr>"
-    +"<tr><td class=g>연수명</td><td>"+(s.trainingName||"-")+"</td></tr>"
-    +"<tr><td class=g>기관·지역</td><td>"+(s.trainingOrg||"-")+" / "+(s.trainingRegion||"-")+"</td></tr>"
-    +"<tr><td class=g>기간</td><td><b>"+(s.startDate||"").replace(/-/g,".")+" "+(s.startTime||"")+" ~ "+(s.endDate||"").replace(/-/g,".")+" "+(s.endTime||"")+"</b></td></tr>"
-    +"<tr><td class=g>형태</td><td>"+(s.isResidence?"합숙":"비합숙")+"</td></tr>"
-    +"<tr><td class=g>동행자</td><td>"+compList+"</td></tr>"
-    +"<tr><td class=g>지급방침</td><td><b>"+pL+"</b></td></tr>"
-    +"<tr><td class=g>방침근거</td><td>"+(s.policyBasis||"")+"</td></tr>"
-    +(s.policy==="partial"?"<tr><td class=g>지급내용</td><td>"+(s.policyNote||"")+"</td></tr>":"")
+    +"<tr><td class=g>소속부서</td><td>"+(s.dept||"—")+"</td></tr>"
+    +"<tr><td class=g>신청자</td><td><b>"+(s.name||"—")+" ("+s.grade+")</b></td></tr>"
+    +"<tr><td class=g>연수명</td><td>"+(s.trainingName||"—")+"</td></tr>"
+    +"<tr><td class=g>연수 기관</td><td>"+(s.trainingOrg||"—")+"</td></tr>"
+    +"<tr><td class=g>연수 기간</td><td>"+(s.startDate||"").replace(/-/g,".")+" "+(s.startTime||"")+" ~ "+(s.endDate||"").replace(/-/g,".")+" "+(s.endTime||"")+" ("+travelDays+"일)</td></tr>"
+    +"<tr><td class=g>숙박 형태</td><td>"+(s.isResidence?"합숙":"비합숙")+"</td></tr>"
+    +"<tr><td class=g>지급 방침</td><td>"+pL+"</td></tr>"
     +"</table>"
-    +(s.policy!=="none"
-      ?"<h2>교통비</h2><table><tr><th>구분</th><th>구간</th><th>수단</th><th>법인카드</th><th>개인지급</th></tr>"
-        +"<tr><td>입소일</td><td>대구→"+(s.trainingRegion||"")+"</td><td>"+((s.inbound?s.inbound.type:"-")||"-")+"</td><td class=g>"+((s.inbound?s.inbound.cardType:null)==="corp"?W(iF):"—")+"</td><td class=b>"+W(pIn)+"</td></tr>"
-        +"<tr><td>퇴소일</td><td>"+(s.trainingRegion||"")+"→대구</td><td>"+((s.outbound?s.outbound.type:"-")||"-")+"</td><td class=g>"+((s.outbound?s.outbound.cardType:null)==="corp"?W(oF):"—")+"</td><td class=b>"+W(pOut)+"</td></tr>"
-        +"</table>"
-        +(s.isResidence&&nRows?"<h2>숙박비</h2><table><tr><th>박차</th><th>형태</th><th>법인카드</th><th>개인지급</th></tr>"+nRows+"</table>":"")
-        +"<h2>일비·식비</h2><table><tr><th>일차</th><th>유형</th><th>일비</th><th>식비</th></tr>"+dRows+"<tr class=h><td colspan=2>합계</td><td class=b>"+W(dT)+"</td><td class=b>"+W(mT)+"</td></tr></table>"
-        +adjTable
-        +"<div class=sum><div style=font-weight:700;margin-bottom:6px>정산 최종 요약</div>"
-        +(totalD>0?"<div class=r><span class=g>AI 산출 개인지급</span><span>"+W(pIn+pOut+aC+dT+mT)+"</span></div><div class=r><span style=color:#92400e>감액</span><span style=color:#dc2626>−"+W(totalD)+"</span></div>":"")
-        +"<div class='r rf'><span>최종 개인 청구액</span><span>"+W(totP)+"</span></div></div>"
-      :"<div class=sum><div style=font-weight:700;color:#991b1b;margin-bottom:4px>여비 지급 없음 — 전액 미지급</div><div style=font-size:12px>근거: "+(s.policyBasis||"")+"</div></div>")
-    ;
-  return "<!DOCTYPE html><html lang=ko><head><meta charset=UTF-8><title>연수 여비 정산 보고서</title><style>"+css+"</style></head><body>"+body+
-    (Object.keys(imgs).length > 0 ?
-      "<div style='page-break-before:always;padding:20px'><h1>첨부 증빙 자료</h1><div style='display:grid;grid-template-columns:1fr 1fr;gap:12px'>" +
-      Object.entries(imgs).filter(([k,v])=>v).map(([k,v])=>{
-        const labels={"confirm":"연수 확인서","transport":"교통비 영수증","accom":"숙박비 영수증","etc":"기타 증빙"};
-        return "<div style='border:1px solid #e5e7eb;border-radius:6px;padding:8px'><div style='font-size:12px;font-weight:600;margin-bottom:6px'>"+labels[k]+"</div><img src='"+v.base64+"' style='width:100%;max-height:320px;object-fit:contain'/></div>";
-      }).join("") + "</div></div>" : "")+"</body></html>";
+    +"<h2>나. 비용항목 정산</h2>"
+    +"<h2>나-1. 교통비  (여비규칙 제11조)</h2>"
+    +"<table><tr><th>구분</th><th>수단/방식</th><th>법인카드</th><th>개인지급</th></tr>"
+    +"<tr><td>출발 (→연수지)</td><td>"+((s.inbound?s.inbound.carMode:"")||"—")+"</td><td class=g>"+W(cIn)+"</td><td class=b>"+W(pIn)+"</td></tr>"
+    +"<tr><td>복귀 (연수지→)</td><td>"+((s.outbound?s.outbound.carMode:"")||"—")+"</td><td class=g>"+W(cOut)+"</td><td class=b>"+W(pOut)+"</td></tr>"
+    +"<tr style=background:#f0f0f0><td colspan=2><b>소계</b></td><td class=b>"+W(cIn+cOut)+"</td><td class=b>"+W(pIn+pOut)+"</td></tr>"
+    +"</table>"
+    +(s.nights&&s.nights.length?"<h2>나-2. 숙박비  (여비규칙 제12조)</h2><table><tr><th>박차</th><th>형태</th><th>금액</th></tr>"+nightRows+"<tr style=background:#f0f0f0><td colspan=2><b>소계</b></td><td class=b>"+W(aC)+"</td></tr></table>":"")
+    +"<h2>나-3. 일비 · 식비  (여비규칙 제14조, 별표1)</h2>"
+    +"<p style=font-size:12px;color:#666;margin:2px 0 4px>일비 기준: 합숙 12,500원/일 · 비합숙 25,000원/일 &nbsp;|&nbsp; 식비 기준: 25,000원/일, 식사 차감 8,333원/식</p>"
+    +"<table><tr><th>일차</th><th>일비 구분</th><th>일비</th><th>식비</th></tr>"
+    +dayRows
+    +"<tr style=background:#f0f0f0><td colspan=2><b>소계</b></td><td class=b>"+W(dT)+"</td><td class=b>"+W(mT)+"</td></tr>"
+    +"</table>"
+    +adjRows
+    +"<h2>다. 최종 정산 금액</h2>"
+    +"<div class=sum>"
+    +"<div class=r><span class=g>교통비 (개인지급)</span><span>"+W(pIn+pOut)+"</span></div>"
+    +(aC?"<div class=r><span class=g>숙박비</span><span>"+W(aC)+"</span></div>":"")
+    +"<div class=r><span class=g>일비</span><span>"+W(dT)+"</span></div>"
+    +"<div class=r><span class=g>식비</span><span>"+W(mT)+"</span></div>"
+    +(totalD?"<div class=r><span class=g>감액</span><span style=font-weight:600>−"+W(totalD)+"</span></div>":"")
+    +"<div class='r rf'><span>◆ 최종 개인 지급 청구액</span><span>"+W(totP)+"</span></div>"
+    +(cIn+cOut?"<div class=r><span style=color:#666;font-size:12px>법인카드 집행</span><span style=color:#666;font-size:12px>"+W(cIn+cOut)+"</span></div>":"")
+    +"</div>"
+    +imgSection
+    +"</body></html>";
 }
+
 
 
 
