@@ -59,6 +59,26 @@ function effectiveGrade(myGrade,hasComp,companions){
 
 export default function RouteB1(){
   const navigate = useNavigate();
+
+  /* ── JSON 불러오기: steps → localStorage + state 복원 ── */
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("kosaf_json_load");
+      if (raw) {
+        const j = JSON.parse(raw);
+        sessionStorage.removeItem("kosaf_json_load");
+        if (j.v === "B" && j.steps) {
+          const {b_step1,b_step2,b_step3,b_step4} = j.steps;
+          if (b_step1) localStorage.setItem("b_step1", JSON.stringify(b_step1));
+          if (b_step2) localStorage.setItem("b_step2", JSON.stringify(b_step2));
+          if (b_step3) localStorage.setItem("b_step3", JSON.stringify(b_step3));
+          if (b_step4) localStorage.setItem("b_step4", JSON.stringify(b_step4));
+          if (b_step1) setS(prev => ({...prev, ...b_step1}));
+        }
+      }
+    } catch(e) {}
+  }, []);
+
   const [s,setS]=useState(init());
 
   const upd=useCallback(p=>setS(prev=>({...prev,...p})),[]);
