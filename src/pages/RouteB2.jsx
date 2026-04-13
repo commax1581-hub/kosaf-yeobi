@@ -268,10 +268,10 @@ export default function RouteB2() {
       </button>
       {/* ── 상단 헤더 배너 ── */}
       <div className="rounded-2xl mb-5 overflow-hidden shadow-sm">
-        <div style={{background:"linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 100%)"}} className="px-5 py-4">
+        <div style={{background:"linear-gradient(135deg,#1a5c38 0%,#27ae60 100%)"}} className="px-5 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs font-semibold text-blue-200 uppercase tracking-widest mb-1">KOSAF 여비를 부탁해....</div>
+              <div className="text-xs font-semibold text-green-200 uppercase tracking-widest mb-1">KOSAF 여비를 부탁해....</div>
               <div className="text-white font-bold text-lg">스마트 여비정산 시스템</div>
             </div>
             <div className="text-right">

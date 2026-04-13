@@ -59,7 +59,7 @@ function genHTML(s){
   const adjTable=adjItems.length?"<h2>나-4. 감액 조정</h2><table><tr><th>항목</th><th>산출값</th><th>감액</th><th>최종값</th><th>사유</th></tr>"+adjItems.map(a=>"<tr><td>"+a.key+"</td><td>"+W2(a.orig)+"</td><td style=color:#333;font-weight:600>−"+W2(a.deduct)+"</td><td style=font-weight:700>"+W2(a.orig-a.deduct)+"</td><td>"+a.reason+"</td></tr>").join("")+"</table>":"";
   const css="@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');body{font-family:'Noto Sans KR',sans-serif;font-size:13px;margin:24px}h1{font-size:17px;font-weight:700;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:16px;color:#111}h2{font-size:13px;font-weight:700;color:#111;background:#f0f0f0;padding:4px 8px;margin:14px 0 4px;border-left:3px solid #333}table{width:100%;border-collapse:collapse;margin-bottom:8px}th{background:#333;color:#fff;padding:5px 8px;text-align:left;font-weight:500;font-size:12px}td{padding:5px 8px;border-bottom:1px solid #ddd}.g{color:#666;font-size:12px}.b{font-weight:700;color:#111}.sum{border:2px solid #111;padding:12px;margin:12px 0;background:#f8f8f8}.r{display:flex;justify-content:space-between;padding:3px 0;font-size:13px}.rf{border-top:2px solid #111;margin-top:8px;padding-top:8px;font-size:16px;font-weight:700}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}";
   return "<!DOCTYPE html><html lang=ko><head><meta charset=UTF-8><title>근무지 내 출장 여비 정산</title><style>"+css+"</style></head><body>"
-    +"<h1>근무지 내 출장 여비 정산 보고서</h1>"
+    +"<h1>근무지 내 출장 여비 정산 보고서 <span style='background:linear-gradient(135deg,#922b21,#e74c3c);color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;vertical-align:middle'>A경로</span></h1>"
     +"<h2>가. 출장 기본정보</h2>"
     +"<table><tr><th>항목</th><th>내용</th></tr>"
     +"<tr><td class=g>소속부서</td><td>"+(s.dept||"—")+"</td></tr>"
@@ -267,10 +267,10 @@ export default function RouteA() {
       </button>
       {/* ── 상단 헤더 배너 ── */}
       <div className="rounded-2xl mb-5 overflow-hidden shadow-sm">
-        <div style={{background:"linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 100%)"}} className="px-5 py-4">
+        <div style={{background:"linear-gradient(135deg,#922b21 0%,#e74c3c 100%)"}} className="px-5 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs font-semibold text-blue-200 uppercase tracking-widest mb-1">KOSAF 여비를 부탁해....</div>
+              <div className="text-xs font-semibold text-red-200 uppercase tracking-widest mb-1">KOSAF 여비를 부탁해....</div>
               <div className="text-white font-bold text-lg">스마트 여비정산 시스템</div>
             </div>
             <div className="text-right">

@@ -418,7 +418,7 @@ function gHTML(s, adjs, imgs){
     : "";
 
   return "<!DOCTYPE html><html lang=ko><head><meta charset=UTF-8><title>연수 여비 정산 보고서</title><style>"+css+"</style></head><body>"
-    +"<h1>연수 여비 정산 보고서</h1>"
+    +"<h1>연수 여비 정산 보고서 <span style='background:linear-gradient(135deg,#1a3a6e,#2980b9);color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;vertical-align:middle'>C경로</span></h1>"
     +"<h2>가. 연수 기본정보</h2>"
     +"<table><tr><th>항목</th><th>내용</th></tr>"
     +"<tr><td class=g>소속부서</td><td>"+(s.dept||"—")+"</td></tr>"
@@ -545,7 +545,7 @@ export default function RouteC(){
       </button>
       {/* ── 상단 헤더 배너 ── */}
       <div className="rounded-2xl mb-5 overflow-hidden shadow-sm">
-        <div style={{background:"linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 100%)"}} className="px-5 py-4">
+        <div style={{background:"linear-gradient(135deg,#1a3a6e 0%,#2980b9 100%)"}} className="px-5 py-4">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-xs font-semibold text-blue-200 uppercase tracking-widest mb-1">KOSAF 여비를 부탁해....</div>

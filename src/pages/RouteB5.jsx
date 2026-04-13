@@ -153,7 +153,7 @@ function genHTML(data,cats,imgs,extra,amt,adjs){
   const xI=(extra||[]).filter(e=>e.img&&e.img.base64).map(e=>({label:e.name||"추가증빙",img:e.img}));
 
   return "<!DOCTYPE html><html lang=ko><head><meta charset=UTF-8><title>국내 출장비 정산 보고서</title><style>"+css+"</style></head><body>"
-    +"<h1>국내 출장비 정산 보고서</h1>"
+    +"<h1>국내 출장비 정산 보고서 <span style='background:linear-gradient(135deg,#1a5c38,#27ae60);color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;vertical-align:middle'>B경로</span></h1>"
     +"<h2>가. 출장 기본정보</h2>"
     +"<table><tr><th>항목</th><th>내용</th></tr>"
     +"<tr><td class=g>소속부서</td><td>"+(data.dept||"—")+"</td></tr>"
@@ -421,7 +421,7 @@ export default function RouteB5(){
         ← 처음으로
       </button>
       <div className="rounded-2xl mb-4 overflow-hidden shadow-sm">
-        <div style={{background:"linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 100%)"}} className="px-5 py-4">
+        <div style={{background:"linear-gradient(135deg,#1a5c38 0%,#27ae60 100%)"}} className="px-5 py-4">
           <div className="text-white font-bold text-2xl leading-tight mb-0.5">KOSAF 여비를 부탁해....</div>
           <div className="text-blue-200 text-sm">스마트 여비정산 시스템</div>
           <div className="text-blue-300 text-xs mt-1">B경로 5단계 — 검증 · 보고서</div>
@@ -473,10 +473,10 @@ export default function RouteB5(){
       </button>
       {/* ── 상단 헤더 배너 ── */}
       <div className="rounded-2xl mb-5 overflow-hidden shadow-sm">
-        <div style={{background:"linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 100%)"}} className="px-5 py-4">
+        <div style={{background:"linear-gradient(135deg,#1a5c38 0%,#27ae60 100%)"}} className="px-5 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs font-semibold text-blue-200 uppercase tracking-widest mb-1">KOSAF 여비를 부탁해....</div>
+              <div className="text-xs font-semibold text-green-200 uppercase tracking-widest mb-1">KOSAF 여비를 부탁해....</div>
               <div className="text-white font-bold text-lg">스마트 여비정산 시스템</div>
             </div>
             <div className="text-right">

@@ -14,7 +14,7 @@ const ROUTES = [
   {
     key: "A",
     label: "근무지 내 출장",
-    bgGrad: "linear-gradient(135deg,#1d4ed8,#3b82f6)",
+    bgGrad: "linear-gradient(135deg,#922b21,#e74c3c)",
     desc: "당일·숙박없음",
     time: "약 1분",
     규정: "제16조",
@@ -23,7 +23,7 @@ const ROUTES = [
   {
     key: "B",
     label: "국내 일반 출장",
-    bgGrad: "linear-gradient(135deg,#065f46,#10b981)",
+    bgGrad: "linear-gradient(135deg,#1a5c38,#27ae60)",
     desc: "숙박 포함 가능",
     time: "약 5분",
     규정: "제11~15조",
@@ -32,7 +32,7 @@ const ROUTES = [
   {
     key: "C",
     label: "국내 연수",
-    bgGrad: "linear-gradient(135deg,#4c1d95,#7c3aed)",
+    bgGrad: "linear-gradient(135deg,#1a3a6e,#2980b9)",
     desc: "연수원·기관 참가",
     time: "약 3분",
     규정: "제17조",
