@@ -131,6 +131,7 @@ function genHTML(data,cats,imgs,extra,amt,adjs){
   const totalD=adjs.reduce((s,a)=>s+(a.deduct||0),0);
   const fin=Math.max(0,pT+pA+dT+mT-totalD);
   const W=n=>Math.round(n||0).toLocaleString("ko-KR")+"원";
+  const I=n=>parseInt(n)||0;
   const css="@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');body{font-family:'Noto Sans KR',sans-serif;font-size:13px;margin:24px}h1{font-size:17px;font-weight:700;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:16px;color:#111}h2{font-size:13px;font-weight:700;color:#111;background:#f0f0f0;padding:4px 8px;margin:14px 0 4px;border-left:3px solid #333}table{width:100%;border-collapse:collapse;margin-bottom:8px}th{background:#333;color:#fff;padding:5px 8px;text-align:left;font-weight:500;font-size:12px}td{padding:5px 8px;border-bottom:1px solid #ddd}.g{color:#666;font-size:12px}.b{font-weight:700}.sum{border:2px solid #111;padding:12px;margin:12px 0;background:#f8f8f8}.r{display:flex;justify-content:space-between;padding:3px 0;font-size:13px}.rf{border-top:2px solid #111;margin-top:8px;padding-top:8px;font-size:16px;font-weight:700}.pg{page-break-before:always;padding:20px}.g4{display:grid;grid-template-columns:1fr 1fr;gap:12px}.gi{border:1px solid #ddd;border-radius:4px;padding:8px}.gl{font-size:12px;font-weight:600;margin-bottom:6px}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}";
 
   const trs=(data.transport||[]).map(t=>{
@@ -703,3 +704,4 @@ export default function RouteB5(){
     </div>
   );
 }
+
