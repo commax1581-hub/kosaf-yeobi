@@ -181,8 +181,10 @@ function genHTML(data,cats,imgs,extra,amt,adjs){
       if(t.carMode==="public"){
         rows.push([seg,"자가용(대중교통준용)","—",W(I(t.pubFare))]);
       }else{
-        const ftL=(FUEL_TYPES.find(f=>f.key===t.fuelType)||{}).label||"";
-        rows.push([seg,"자가용 연료비"+(ftL?"("+ftL+")":""),"—",W(calcFuel(t))]);
+        const ft=(FUEL_TYPES.find(f=>f.key===t.fuelType)||{});
+        const ftL=ft.label||"";
+        const fuelBasis=(t.distance&&t.fuelPrice&&ft.rate)?"<br><span style='font-size:11px;color:#888'>"+Number(t.distance).toLocaleString("ko-KR")+"km × "+Number(t.fuelPrice).toLocaleString("ko-KR")+"원 ÷ "+ft.rate+"(연비) = "+W(calcFuel(t))+"</span>":"";
+        rows.push([seg,"자가용 연료비"+(ftL?"("+ftL+")":"")+fuelBasis,"—",W(calcFuel(t))]);
         if(t.hasToll&&t.toll)       rows.push([seg,"통행료",t.tollCard==="corp"?W(I(t.toll)):"—",t.tollCard==="corp"?"0원":W(I(t.toll))]);
         if(t.hasParking&&t.parking) rows.push([seg,"주차료",t.parkingCard==="corp"?W(I(t.parking)):"—",t.parkingCard==="corp"?"0원":W(I(t.parking))]);
       }
