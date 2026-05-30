@@ -51,6 +51,42 @@ function bldDays(s,e){
 }
 const bdAmt=(d,res)=>(d.isFirst||d.isLast)?25000:res?0:12500;
 const cFuel=t=>{const f=FT.find(x=>x.k===t.fuelType);return f&&t.distance&&t.fuelPrice?Math.round(parseFloat(t.distance)*parseFloat(t.fuelPrice)/f.r):0;};
+/* 교통편 1건의 개인지급/법인카드 운임 산출 (연료비·통행료·주차료 포함) */
+const segT=t=>{
+  const I=n=>parseInt(n)||0;
+  let corp=0,personal=0;
+  if(!t) return {corp,personal};
+  if(t.type==="gov"){
+    if(t.hasPark&&t.park) (t.parkCard==="corp"?corp+=I(t.park):personal+=I(t.park));
+  }else if(t.type==="car"){
+    if(t.carMode==="public"){
+      personal+=I(t.pubFare);
+    }else{
+      personal+=cFuel(t);
+      if(t.hasToll&&t.toll) (t.tollCard==="corp"?corp+=I(t.toll):personal+=I(t.toll));
+      if(t.hasPark&&t.park) (t.parkCard==="corp"?corp+=I(t.park):personal+=I(t.park));
+    }
+  }else{
+    if(t.cardType==="corp") corp+=I(t.fare);
+    else if(t.cardType!=="gov") personal+=I(t.fare);
+  }
+  return {corp,personal};
+};
+/* 교통편 수단/방식 설명 (보고서 표시용) */
+const segDesc=t=>{
+  if(!t||!t.type) return "—";
+  const TY={ktx:"KTX",bus:"버스",air:"항공",ship:"선박"};
+  if(t.type==="gov") return "관용차"+(t.hasPark&&t.park?" + 주차료":"");
+  if(t.type==="car"){
+    if(t.carMode==="public") return "자가용(대중교통준용)";
+    const ftL=(FT.find(f=>f.k===t.fuelType)||{}).l||"";
+    let s="자가용 연료비"+(ftL?"("+ftL+")":"");
+    if(t.hasToll&&t.toll) s+=" + 통행료";
+    if(t.hasPark&&t.park) s+=" + 주차료";
+    return s;
+  }
+  return TY[t.type]||t.type;
+};
 const eT=()=>({type:"",fare:"",cardType:"",personalReason:"",carMode:"",carRs:[],pubFare:"",fuelType:"",distance:"",fuelPrice:"",hasToll:null,toll:"",tollCard:"",tollRsn:"",hasPark:null,park:"",parkCard:"",parkRsn:""});
 const eN=()=>({type:"",amount:"",cardType:"",personalReason:"",provider:""});
 const isTV=t=>{if(!t.type)return false;if(t.type==="gov")return true;if(t.type==="car"){if(!t.carMode)return false;if(t.carMode==="public")return!!t.pubFare;if(t.carMode==="fuel"){const ok=t.carRs.length>0&&t.fuelType&&t.distance&&t.fuelPrice&&t.hasToll!==null&&t.hasPark!==null;if(!ok)return false;if(t.hasToll&&!t.toll)return false;if(t.hasPark&&!t.park)return false;return true;}return false;}return!!(t.fare&&t.cardType&&(t.cardType!=="personal"||t.personalReason.trim()));};
@@ -383,12 +419,13 @@ function gHTML(s, adjs, imgs){
   imgs = imgs || {};
   const W = n => Math.round(n||0).toLocaleString("ko-KR")+"원";
   const days = bldDays(s.startDate, s.endDate);
-  const iF = (s.inbound?s.inbound.carMode:null)==="fuel" ? cFuel(s.inbound) : parseInt((s.inbound?s.inbound.carMode:null)==="public"?s.inbound.pubFare||0:(s.inbound?s.inbound.fare:0))||0;
-  const oF = (s.outbound?s.outbound.carMode:null)==="fuel" ? cFuel(s.outbound) : parseInt((s.outbound?s.outbound.carMode:null)==="public"?s.outbound.pubFare||0:(s.outbound?s.outbound.fare:0))||0;
-  const pIn = ((s.inbound?s.inbound.cardType:null)!=="corp"&&(s.inbound?s.inbound.cardType:null)!=="gov") ? iF : 0;
-  const pOut = ((s.outbound?s.outbound.cardType:null)!=="corp"&&(s.outbound?s.outbound.cardType:null)!=="gov") ? oF : 0;
-  const cIn = ((s.inbound?s.inbound.cardType:null)==="corp") ? iF : 0;
-  const cOut = ((s.outbound?s.outbound.cardType:null)==="corp") ? oF : 0;
+  const sIn=segT(s.inbound), sOut=segT(s.outbound);
+  const iF = sIn.corp+sIn.personal;
+  const oF = sOut.corp+sOut.personal;
+  const pIn = sIn.personal;
+  const pOut = sOut.personal;
+  const cIn = sIn.corp;
+  const cOut = sOut.corp;
   const aC = (s.nights||[]).reduce((sm,n)=>sm+(n.type==="relative"?20000:parseInt(n.amount)||0),0);
   const dT = (s.dayData||[]).reduce((sm,d)=>{const b=bdAmt(d,s.isResidence);return sm+(d.dayDeduct?Math.round(b/2):b);},0);
   const mT = (s.dayData||[]).reduce((sm,d)=>sm+Math.max(0,25000-[d.b,d.l,d.d].filter(Boolean).length*MU),0);
@@ -432,8 +469,8 @@ function gHTML(s, adjs, imgs){
     +"<h2>나. 비용항목 정산</h2>"
     +"<h2>나-1. 교통비  (여비규칙 제11조)</h2>"
     +"<table><tr><th>구분</th><th>수단/방식</th><th>법인카드</th><th>개인지급</th></tr>"
-    +"<tr><td>출발 (→연수지)</td><td>"+((s.inbound?s.inbound.carMode:"")||"—")+"</td><td class=g>"+W(cIn)+"</td><td class=b>"+W(pIn)+"</td></tr>"
-    +"<tr><td>복귀 (연수지→)</td><td>"+((s.outbound?s.outbound.carMode:"")||"—")+"</td><td class=g>"+W(cOut)+"</td><td class=b>"+W(pOut)+"</td></tr>"
+    +"<tr><td>출발 (→연수지)</td><td>"+segDesc(s.inbound)+"</td><td class=g>"+W(cIn)+"</td><td class=b>"+W(pIn)+"</td></tr>"
+    +"<tr><td>복귀 (연수지→)</td><td>"+segDesc(s.outbound)+"</td><td class=g>"+W(cOut)+"</td><td class=b>"+W(pOut)+"</td></tr>"
     +"<tr style=background:#f0f0f0><td colspan=2><b>소계</b></td><td class=b>"+W(cIn+cOut)+"</td><td class=b>"+W(pIn+pOut)+"</td></tr>"
     +"</table>"
     +(s.nights&&s.nights.length?"<h2>나-2. 숙박비  (여비규칙 제12조)</h2><table><tr><th>박차</th><th>형태</th><th>금액</th></tr>"+nightRows+"<tr style=background:#f0f0f0><td colspan=2><b>소계</b></td><td class=b>"+W(aC)+"</td></tr></table>":"")
@@ -803,10 +840,8 @@ export default function RouteC(){
             감액 시 사유 입력 필수 — 보고서에 명시됩니다.
           </div>
           {(()=>{
-            const iF=(s.inbound?s.inbound.carMode:null)==="fuel"?cFuel(s.inbound):parseInt((s.inbound?s.inbound.carMode:null)==="public"?s.inbound.pubFare||0:(s.inbound?s.inbound.fare:0))||0;
-            const oF=(s.outbound?s.outbound.carMode:null)==="fuel"?cFuel(s.outbound):parseInt((s.outbound?s.outbound.carMode:null)==="public"?s.outbound.pubFare||0:(s.outbound?s.outbound.fare:0))||0;
-            const pIn=((s.inbound?s.inbound.cardType:null)!=="corp"&&(s.inbound?s.inbound.cardType:null)!=="gov")?iF:0;
-            const pOut=((s.outbound?s.outbound.cardType:null)!=="corp"&&(s.outbound?s.outbound.cardType:null)!=="gov")?oF:0;
+            const pIn=segT(s.inbound).personal;
+            const pOut=segT(s.outbound).personal;
             const aC=(s.nights||[]).reduce((sm,n)=>sm+(n.type==="relative"?20000:parseInt(n.amount)||0),0);
             const dT=s.dayData.reduce((sm,d)=>{const b=bdAmt(d,s.isResidence);return sm+(d.dayDeduct?Math.round(b/2):b);},0);
             const mT=s.dayData.reduce((sm,d)=>sm+Math.max(0,25000-[d.b,d.l,d.d].filter(Boolean).length*MU),0);
@@ -918,3 +953,4 @@ export default function RouteC(){
     </div>
   );
 }
+
