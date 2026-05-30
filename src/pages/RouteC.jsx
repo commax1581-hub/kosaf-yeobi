@@ -75,14 +75,17 @@ const segT=t=>{
 /* 교통편 수단/방식 설명 (보고서 표시용) */
 const segDesc=t=>{
   if(!t||!t.type) return "—";
+  const wn=n=>Math.round(n||0).toLocaleString("ko-KR")+"원";
   const TY={ktx:"KTX",bus:"버스",air:"항공",ship:"선박"};
   if(t.type==="gov") return "관용차"+(t.hasPark&&t.park?" + 주차료":"");
   if(t.type==="car"){
     if(t.carMode==="public") return "자가용(대중교통준용)";
-    const ftL=(FT.find(f=>f.k===t.fuelType)||{}).l||"";
+    const ft=(FT.find(f=>f.k===t.fuelType)||{});
+    const ftL=ft.l||"";
     let s="자가용 연료비"+(ftL?"("+ftL+")":"");
-    if(t.hasToll&&t.toll) s+=" + 통행료";
-    if(t.hasPark&&t.park) s+=" + 주차료";
+    if(t.distance&&t.fuelPrice&&ft.r) s+="<br><span style='font-size:11px;color:#888'>"+Number(t.distance).toLocaleString("ko-KR")+"km × "+Number(t.fuelPrice).toLocaleString("ko-KR")+"원 ÷ "+ft.r+"(연비) = "+wn(cFuel(t))+"</span>";
+    if(t.hasToll&&t.toll) s+="<br>+ 통행료 "+wn(parseInt(t.toll)||0);
+    if(t.hasPark&&t.park) s+="<br>+ 주차료 "+wn(parseInt(t.park)||0);
     return s;
   }
   return TY[t.type]||t.type;
