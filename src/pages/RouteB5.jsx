@@ -481,8 +481,8 @@ export default function RouteB5(){
   /* ── 시작 화면 ── */
   if(screen==="start") return(
     <div className="max-w-lg mx-auto p-4 pb-12" style={{background:"#f0f4ff",minHeight:"100vh"}}>
-      <button onClick={()=>navigate("/")} className="flex items-center gap-1 text-sm text-gray-400 hover:text-blue-600 mb-3 cursor-pointer">
-        ← 처음으로
+      <button onClick={()=>navigate("/")} className="flex items-center gap-1.5 text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 mb-4 cursor-pointer hover:bg-blue-100 transition-all shadow-sm">
+        ← 경로 선택 화면으로 (A · B · C)
       </button>
       <div className="rounded-2xl mb-4 overflow-hidden shadow-sm">
         <div style={{background:"linear-gradient(135deg,#1a5c38 0%,#27ae60 100%)"}} className="px-5 py-4">
@@ -532,8 +532,8 @@ export default function RouteB5(){
   return(
     <div className="max-w-2xl mx-auto p-4 pb-12" style={{background:"#f0f4ff",minHeight:"100vh"}}>
             {/* 뒤로가기 */}
-      <button onClick={()=>navigate('/')} className="flex items-center gap-1 text-sm text-gray-400 hover:text-blue-600 mb-3 cursor-pointer">
-        ← 처음으로
+      <button onClick={()=>navigate('/')} className="flex items-center gap-1.5 text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 mb-4 cursor-pointer hover:bg-blue-100 transition-all shadow-sm">
+        ← 경로 선택 화면으로 (A · B · C)
       </button>
       {/* ── 상단 헤더 배너 ── */}
       <div className="rounded-2xl mb-5 overflow-hidden shadow-sm">
