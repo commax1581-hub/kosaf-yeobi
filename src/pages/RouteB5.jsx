@@ -3,6 +3,45 @@ import { useNavigate } from 'react-router-dom'
 
 const fmtW = n => Math.round(n||0).toLocaleString("ko-KR")+"원";
 const MEAL_UNIT = 8333;
+
+/* ── 연료비 계산 (B2 RouteB2.jsx와 동일 기준) ── */
+const FUEL_TYPES = [
+  { key: "gasoline", label: "휘발유",      rate: 11.97 },
+  { key: "diesel",   label: "경유",        rate: 12.52 },
+  { key: "lpg",      label: "LPG",         rate: 8.83  },
+  { key: "hybrid",   label: "하이브리드",  rate: 15.37 },
+  { key: "plugin",   label: "플러그인",    rate: 10.61 },
+  { key: "ev",       label: "전기",        rate: 2.84  },
+  { key: "hydrogen", label: "수소",        rate: 94.9  },
+];
+const calcFuel = t => {
+  const ft = FUEL_TYPES.find(f => f.key === t.fuelType);
+  if (!ft || !t.distance || !t.fuelPrice) return 0;
+  return Math.round(parseFloat(t.distance) * parseFloat(t.fuelPrice) / ft.rate);
+};
+/* 교통편 1건의 개인지급/법인카드 운임 산출 (연료비·통행료·주차료 포함) */
+const segTransport = t => {
+  const I = n => parseInt(n)||0;
+  let corp = 0, personal = 0;
+  if (t.type === "gov") {
+    // 관용차: 운임 미지급, 통행료·주차료만
+    if (t.hasParking && t.parking) (t.parkingCard==="corp" ? corp+=I(t.parking) : personal+=I(t.parking));
+  } else if (t.type === "car") {
+    if (t.carMode === "public") {
+      personal += I(t.pubFare); // 대중교통준용 (통행료·주차료 별도 미지급)
+    } else {
+      personal += calcFuel(t); // 연료비 (항상 개인지급)
+      if (t.hasToll && t.toll)       (t.tollCard==="corp"    ? corp+=I(t.toll)    : personal+=I(t.toll));
+      if (t.hasParking && t.parking) (t.parkingCard==="corp" ? corp+=I(t.parking) : personal+=I(t.parking));
+    }
+  } else {
+    // 일반 교통수단 (ktx/bus/air/ship)
+    if (t.cardType === "corp") corp += I(t.fare);
+    else if (t.cardType !== "gov") personal += I(t.fare);
+  }
+  return { corp, personal };
+};
+
 const card = "bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-5";
 const ct   = "text-xs font-medium text-gray-500 uppercase tracking-wider mb-3";
 const inp  = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 bg-white text-gray-900";
@@ -63,11 +102,8 @@ function calcAmounts(data){
   const tr=data.transport||[],ac=(Array.isArray(data.accom)?data.accom:[]).flatMap(a=>a.nights||[]),db=data.dayBasis||[];
   const I=n=>parseInt(n)||0;
   return {
-    corpTransport:      tr.reduce((s,t)=>s+(t.cardType==="corp"?I(t.fare):0),0),
-    personalTransport:  tr.reduce((s,t)=>{
-      if(t.cardType==="corp"||t.cardType==="gov") return s;
-      return s+(t.type==="car"&&t.carMode==="public"?I(t.pubFare):I(t.fare));
-    },0),
+    corpTransport:      tr.reduce((s,t)=>s+segTransport(t).corp,0),
+    personalTransport:  tr.reduce((s,t)=>s+segTransport(t).personal,0),
     corpAccom:          ac.reduce((s,n)=>s+(n.cardType==="corp"?I(n.amount):0),0),
     personalAccom:      ac.reduce((s,n)=>s+(n.type==="relative"?20000:n.cardType!=="corp"&&I(n.amount)>0?I(n.amount):0),0),
     dayTotal:           db.reduce((s,d)=>s+(d.dayDeduct?12500:25000),0),
@@ -135,11 +171,26 @@ function genHTML(data,cats,imgs,extra,amt,adjs){
   const css="@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');body{font-family:'Noto Sans KR',sans-serif;font-size:13px;margin:24px}h1{font-size:17px;font-weight:700;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:16px;color:#111}h2{font-size:13px;font-weight:700;color:#111;background:#f0f0f0;padding:4px 8px;margin:14px 0 4px;border-left:3px solid #333}table{width:100%;border-collapse:collapse;margin-bottom:8px}th{background:#333;color:#fff;padding:5px 8px;text-align:left;font-weight:500;font-size:12px}td{padding:5px 8px;border-bottom:1px solid #ddd}.g{color:#666;font-size:12px}.b{font-weight:700}.sum{border:2px solid #111;padding:12px;margin:12px 0;background:#f8f8f8}.r{display:flex;justify-content:space-between;padding:3px 0;font-size:13px}.rf{border-top:2px solid #111;margin-top:8px;padding-top:8px;font-size:16px;font-weight:700}.pg{page-break-before:always;padding:20px}.g4{display:grid;grid-template-columns:1fr 1fr;gap:12px}.gi{border:1px solid #ddd;border-radius:4px;padding:8px}.gl{font-size:12px;font-weight:600;margin-bottom:6px}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}";
 
   const trs=(data.transport||[]).map(t=>{
-    const isPubCar=t.type==="car"&&t.carMode==="public";
-    const isFuelCar=t.type==="car"&&t.carMode==="fuel";
-    const dispFare=isPubCar?I(t.pubFare):I(t.fare);
-    const dispNote=isPubCar?"자가용(대중교통준용)":isFuelCar?"자가용(연료비)":t.note||t.type||"";
-    return "<tr><td>"+(t.seg||"")+"</td><td>"+dispNote+"</td><td class=g>"+(t.cardType==="corp"?W(dispFare):"—")+"</td><td class=b>"+(t.cardType!=="corp"&&t.cardType!=="gov"?W(dispFare):"0원")+"</td></tr>";
+    const seg=t.seg||"";
+    const rows=[];
+    const TY={ktx:"KTX",bus:"버스",air:"항공",ship:"선박"};
+    if(t.type==="gov"){
+      rows.push([seg,"관용차 운임","—","0원"]);
+      if(t.hasParking&&t.parking) rows.push([seg,"주차료",t.parkingCard==="corp"?W(I(t.parking)):"—",t.parkingCard==="corp"?"0원":W(I(t.parking))]);
+    }else if(t.type==="car"){
+      if(t.carMode==="public"){
+        rows.push([seg,"자가용(대중교통준용)","—",W(I(t.pubFare))]);
+      }else{
+        const ftL=(FUEL_TYPES.find(f=>f.key===t.fuelType)||{}).label||"";
+        rows.push([seg,"자가용 연료비"+(ftL?"("+ftL+")":""),"—",W(calcFuel(t))]);
+        if(t.hasToll&&t.toll)       rows.push([seg,"통행료",t.tollCard==="corp"?W(I(t.toll)):"—",t.tollCard==="corp"?"0원":W(I(t.toll))]);
+        if(t.hasParking&&t.parking) rows.push([seg,"주차료",t.parkingCard==="corp"?W(I(t.parking)):"—",t.parkingCard==="corp"?"0원":W(I(t.parking))]);
+      }
+    }else{
+      const nm=TY[t.type]||t.note||t.type||"";
+      rows.push([seg,nm,t.cardType==="corp"?W(I(t.fare)):"—",t.cardType!=="corp"&&t.cardType!=="gov"?W(I(t.fare)):"0원"]);
+    }
+    return rows.map(r=>"<tr><td>"+r[0]+"</td><td>"+r[1]+"</td><td class=g>"+r[2]+"</td><td class=b>"+r[3]+"</td></tr>").join("");
   }).join("");
   const ars=(Array.isArray(data.accom)?data.accom:[]).flatMap((a)=>(a.nights||[]).map((n,ni)=>"<tr><td>"+a.region+"</td><td>"+(ni+1)+"박</td><td>"+(n.type==="hotel"?"일반":n.type==="relative"?"친지집":n.type==="provided"?"기관제공":"미숙박")+"</td><td class=g>"+(n.cardType==="corp"?W(n.amount||0):"—")+"</td><td class=b>"+(n.type==="relative"?W(20000):n.cardType!=="corp"&&n.amount>0?W(n.amount):"0원")+"</td></tr>")).join("");
   const drs=(data.dayBasis||[]).map(da=>{const c=[da.b,da.l,da.d].filter(Boolean).length;return"<tr><td>"+da.dayNum+"일차 "+da.label+"</td><td>"+(da.dayDeduct?"관용차 이용":"정상")+"</td><td class=b>"+(da.dayDeduct?W(12500)+"(½)":W(25000))+"</td><td class=b>"+W(Math.max(0,25000-c*8333))+(c?" ("+c+"식 차감)":"")+"</td></tr>";}).join("");
