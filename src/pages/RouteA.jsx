@@ -63,6 +63,7 @@ function genHTML(s){
     +"<h2>가. 출장 기본정보</h2>"
     +"<table><tr><th>항목</th><th>내용</th></tr>"
     +"<tr><td class=g>소속부서</td><td>"+(s.dept||"—")+"</td></tr>"
+    +"<tr><td class=g>출발지</td><td>"+(s.origin||s.dept||"—")+"</td></tr>"
     +"<tr><td class=g>신청자</td><td><b>"+(s.name||"—")+" ("+s.grade+")</b></td></tr>"
     +"<tr><td class=g>출장 일시</td><td>"+(s.sd||"").replace(/-/g,".")+" "+s.st+" ~ "+(s.ed||"").replace(/-/g,".")+" "+s.et+"</td></tr>"
     +"<tr><td class=g>소요 시간</td><td>"+fmtH(h)+" ("+(h>=4?"4시간 이상":"4시간 미만")+")</td></tr>"
@@ -612,4 +613,5 @@ export default function RouteA() {
     </div>
   );
 }
+
 
