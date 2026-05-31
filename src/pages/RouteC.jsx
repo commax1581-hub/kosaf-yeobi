@@ -2,6 +2,11 @@ import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const fmtW = n => Math.round(n||0).toLocaleString("ko-KR")+"원";
+const MoneyHint = ({v}) => {
+  const n = parseInt(v) || 0;
+  if (!v || n <= 0) return null;
+  return <div className="text-xs text-blue-600 font-semibold mt-1">= {n.toLocaleString("ko-KR")}원</div>;
+};
 const MU = 8333;
 const GR = ["임원","본부장","부서장·팀장","팀원"];
 const GO = ["임원","본부장","부서장·팀장","팀원"];
@@ -127,6 +132,7 @@ const TollPark=({label,hk,ak,ck,rk,t,upd})=>(
     {t[hk]===true&&<>
       <input className={inp+" mt-2"} type="text" inputMode="numeric" value={t[ak]} placeholder="금액 (원)"
         onChange={e=>upd({[ak]:e.target.value.replace(/[^0-9]/g,"")})}/>
+      <MoneyHint v={t[ak]} />
       <div className="flex gap-2 mt-2">
         <TB small sel={t[ck]==="corp"}     onClick={()=>upd({[ck]:"corp",[rk]:""})}>법인카드</TB>
         <TB small sel={t[ck]==="personal"} onClick={()=>upd({[ck]:"personal"})}>개인카드</TB>
@@ -162,6 +168,7 @@ const TransportForm=({t,seg,startDate,upd,eg})=>{
         <div className={lbl}>운임 금액 (원)</div>
         <input className={inp} type="text" inputMode="numeric" value={t.fare} placeholder="실제 운임"
           onChange={e=>upd({fare:e.target.value.replace(/[^0-9]/g,"")})}/>
+        <MoneyHint v={t.fare} />
         <div className={lbl}>결제 수단</div>
         <div className="flex gap-2 mt-1">
           <TB small sel={t.cardType==="corp"}     onClick={()=>upd({cardType:"corp",personalReason:""})}>법인카드</TB>
@@ -196,6 +203,7 @@ const TransportForm=({t,seg,startDate,upd,eg})=>{
           </div>
           <input className={inp+" mt-2"} type="text" inputMode="numeric" value={t.pubFare} placeholder="대중교통준용 요금 (원)"
             onChange={e=>upd({pubFare:e.target.value.replace(/[^0-9]/g,"")})}/>
+          <MoneyHint v={t.pubFare} />
           {t.pubFare&&<div className="mt-1 text-sm font-medium text-blue-600">{"개인지급: "+fmtW(parseInt(t.pubFare)||0)}</div>}
           <div className={wbox+" mt-2 text-xs"}>대중교통준용 시 통행료·주차료 별도 지급 없음 (별표1 비고6)</div>
         </>}
@@ -258,6 +266,7 @@ const NightRow=({n,num,date,limit,upd})=>{
         <div className={lbl}>금액 (원) <span className="text-xs text-gray-400 font-normal">— 상한 {fmtW(limit)}</span></div>
         <input className={inp} type="text" inputMode="numeric" value={n.amount} placeholder={"상한 "+fmtW(limit)}
           onChange={e=>upd({amount:e.target.value.replace(/[^0-9]/g,"")})}/>
+        <MoneyHint v={n.amount} />
         {n.amount&&<div className={"mt-1 text-xs rounded-lg px-2 py-1.5 "+(isOver?"bg-red-50 text-red-700":"bg-green-50 text-green-700")}>{isOver?"⚠️ 상한 초과: "+fmtW(amt):"✅ 상한 이내: "+fmtW(amt)}</div>}
         <div className={lbl}>결제 수단</div>
         <div className="flex gap-2 mt-1 flex-wrap">
@@ -892,6 +901,7 @@ export default function RouteC(){
                           if(n>item.orig){alert("⚠️ 증액 불가. 처음으로 돌아가 재계산하세요.");n=item.orig;}
                           setAdj(item.key,item.orig,{deduct:n});
                         }}/>
+                      <MoneyHint v={adj.deduct||""} />
                       {adj.deduct>0&&<div className="flex justify-between text-sm mt-2 p-2 bg-white rounded-lg border border-amber-200"><span className="text-gray-500">최종값</span><span className="font-medium text-amber-700">{fmtW(item.orig-adj.deduct)}</span></div>}
                       <div className="block text-sm text-gray-500 mb-1 mt-3">감액 사유 <span className="text-red-500">*필수</span></div>
                       <input className={inp} type="text" value={adj.reason}
@@ -971,4 +981,5 @@ export default function RouteC(){
     </div>
   );
 }
+
 
