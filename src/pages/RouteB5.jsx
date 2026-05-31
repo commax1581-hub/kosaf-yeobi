@@ -220,6 +220,7 @@ function genHTML(data,cats,imgs,extra,amt,adjs){
     +"<h2>가. 출장 기본정보</h2>"
     +"<table><tr><th>항목</th><th>내용</th></tr>"
     +"<tr><td class=g>소속부서</td><td>"+(data.dept||"—")+"</td></tr>"
+    +"<tr><td class=g>출발지</td><td>"+(data.origin||data.dept||"—")+"</td></tr>"
     +"<tr><td class=g>신청자</td><td><b>"+(data.name||"—")+" ("+data.grade+")</b></td></tr>"
     +"<tr><td class=g>출장기간</td><td>"+(data.startDate||"").replace(/-/g,".")+" "+(data.startTime||"")+" ~ "+(data.endDate||"").replace(/-/g,".")+" "+(data.endTime||"")+" ("+data.travelDays+"일)</td></tr>"
     +"<tr><td class=g>출장지</td><td>"+(data.routes||[]).map(r=>r.region+(r.place?" ("+r.place+")":"")).join(" → ")+"</td></tr>"
@@ -772,4 +773,5 @@ export default function RouteB5(){
     </div>
   );
 }
+
 
