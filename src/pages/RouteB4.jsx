@@ -202,15 +202,38 @@ export default function RouteB4() {
   const days = buildDays(PREV.startDate, PREV.endDate);
   const { hasVehicle, hasGov, hasCar } = detectVehicleDays(PREV.transport);
 
-  const [dayData, setDayData] = useState(() => initDayData(days, PREV.transport));
+  const [dayData, setDayData] = useState(() => {
+    // 새로고침 복원: raw 자동저장본이 있으면 사용
+    try {
+      const saved = JSON.parse(localStorage.getItem("b_step4_raw") || "null");
+      if (saved && Array.isArray(saved.dayData) && saved.dayData.length > 0) {
+        return saved.dayData;
+      }
+    } catch(e) {}
+    return initDayData(days, PREV.transport);
+  });
   const [step, setStep] = useState(0); // 0:일비 1:식비 2:외부공제 3:요약
-  const [extSupport, setExtSupport] = useState({
-    hasTransport: null,
-    transportNote: "",
-    hasMeal: false,
-    mealDays: [],
+  const [extSupport, setExtSupport] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("b_step4_raw") || "null");
+      if (saved && saved.extSupport) return saved.extSupport;
+    } catch(e) {}
+    return {
+      hasTransport: null,
+      transportNote: "",
+      hasMeal: false,
+      mealDays: [],
+    };
   });
   const [showSummary, setShowSummary] = useState(false);
+
+  /* ── 입력 중 자동저장 (raw 상태, 새로고침 대비) ── */
+  useEffect(() => {
+    const tm = setTimeout(() => {
+      try { localStorage.setItem("b_step4_raw", JSON.stringify({ dayData, extSupport })); } catch(e) {}
+    }, 500);
+    return () => clearTimeout(tm);
+  }, [dayData, extSupport]);
 
   const updDay = useCallback((i, patch) =>
     setDayData(prev => prev.map((d, idx) => idx === i ? { ...d, ...patch } : d)), []);
@@ -592,4 +615,5 @@ export default function RouteB4() {
     </div>
   );
 }
+
 
