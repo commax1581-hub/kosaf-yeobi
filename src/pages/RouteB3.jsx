@@ -9,6 +9,11 @@ const LIMIT = {
 };
 const getLimit = r => LIMIT[r] || 70000;
 const fmtW = n => Math.round(n || 0).toLocaleString("ko-KR") + "원";
+const MoneyHint = ({v}) => {
+  const n = parseInt(v) || 0;
+  if (!v || n <= 0) return null;
+  return <div className="text-xs text-blue-600 font-semibold mt-1">= {n.toLocaleString("ko-KR")}원</div>;
+};
 
 const ACCOM_TYPES = [
   { key: "hotel",    label: "일반 숙박" },
@@ -182,6 +187,7 @@ const NightRow = ({ n, nightNum, nightDate, limit, onUpdate }) => {
         <input className={inp} type="text" inputMode="numeric" pattern="[0-9]*"
           value={n.amount} placeholder={"이 박(1박) 본인 몫 금액 입력 / 상한 "+fmtW(limit)}
           onChange={e => onUpdate({ amount: e.target.value.replace(/[^0-9]/g, "") })} />
+        <MoneyHint v={n.amount} />
 
         {/* 상한 체크 */}
         {n.amount && (
@@ -611,4 +617,5 @@ export default function RouteB3() {
     </div>
   );
 }
+
 
