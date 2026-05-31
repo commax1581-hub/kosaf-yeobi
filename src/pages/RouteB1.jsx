@@ -61,6 +61,7 @@ export default function RouteB1(){
   const navigate = useNavigate();
 
   /* ── JSON 불러오기: steps → localStorage + state 복원 ── */
+  const [jsonLoaded, setJsonLoaded] = useState(false);
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem("kosaf_json_load");
@@ -74,6 +75,8 @@ export default function RouteB1(){
           if (b_step3) localStorage.setItem("b_step3", JSON.stringify(b_step3));
           if (b_step4) localStorage.setItem("b_step4", JSON.stringify(b_step4));
           if (b_step1) setS(prev => ({...prev, ...b_step1}));
+          setJsonLoaded(true);
+          setTimeout(() => setJsonLoaded(false), 8000); // 8초 후 자동 닫힘
         }
       }
     } catch(e) {}
@@ -122,6 +125,18 @@ export default function RouteB1(){
       <button onClick={()=>navigate('/')} className="flex items-center gap-1.5 text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 mb-4 cursor-pointer hover:bg-blue-100 transition-all shadow-sm">
         ← 경로 선택 화면으로 (A · B · C)
       </button>
+
+      {/* ── JSON 불러오기 안내 배너 ── */}
+      {jsonLoaded && (
+        <div className="flex items-start justify-between gap-3 bg-green-50 border border-green-300 rounded-xl px-4 py-3 mb-4 shadow-sm">
+          <div>
+            <div className="text-sm font-bold text-green-800 mb-0.5">✅ 저장된 정산 파일을 불러왔습니다</div>
+            <div className="text-xs text-green-700">내용을 확인·수정 후 단계별로 진행하거나, <span className="font-semibold">5단계(보고서)</span>에서 바로 출력할 수 있습니다.</div>
+          </div>
+          <button onClick={()=>setJsonLoaded(false)} className="text-green-500 hover:text-green-800 text-lg font-bold leading-none mt-0.5 cursor-pointer">✕</button>
+        </div>
+      )}
+
       {/* ── 상단 헤더 배너 ── */}
       <div className="rounded-2xl mb-5 overflow-hidden shadow-sm">
         <div style={{background:"linear-gradient(135deg,#1a5c38 0%,#27ae60 100%)"}} className="px-5 py-4">
