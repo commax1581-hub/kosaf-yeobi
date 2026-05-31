@@ -205,9 +205,26 @@ export default function RouteB2() {
   };
   const _isFromStorage1 = !!_raw1;
 
-  const [ts, setTs] = useState(buildSegs(PREV.routes, PREV.origin || PREV.dept).map(() => emptyT()));
+  const [ts, setTs] = useState(() => {
+    // 새로고침 시 복원: 저장된 b_step2가 있으면 사용
+    try {
+      const saved = JSON.parse(localStorage.getItem("b_step2") || "null");
+      if (saved && Array.isArray(saved.transport) && saved.transport.length > 0) {
+        return saved.transport;
+      }
+    } catch(e) {}
+    return buildSegs(PREV.routes, PREV.origin || PREV.dept).map(() => emptyT());
+  });
   const [cur, setCur] = useState(0);
   const [showSummary, setShowSummary] = useState(false);
+
+  /* ── 입력 중 자동저장 (새로고침해도 데이터 유지) ── */
+  useEffect(() => {
+    const tm = setTimeout(() => {
+      try { localStorage.setItem("b_step2", JSON.stringify({ transport: ts })); } catch(e) {}
+    }, 500);
+    return () => clearTimeout(tm);
+  }, [ts]);
 
   const segs = buildSegs(PREV.routes, PREV.origin || PREV.dept);
   const eg = effGrade(PREV.grade, PREV.hasComp, PREV.companions);
