@@ -279,8 +279,25 @@ export default function RouteB3() {
     ],
   };
 
-  const [st, setSt] = useState(() => initState(PREV));
+  const [st, setSt] = useState(() => {
+    // 새로고침 시 복원: 저장된 b_step3의 accom 구조가 유효하면 사용
+    try {
+      const saved = JSON.parse(localStorage.getItem("b_step3") || "null");
+      if (saved && saved.accom && saved.accom.travelers && saved.accom.accoms) {
+        return saved.accom;
+      }
+    } catch(e) {}
+    return initState(PREV);
+  });
   const [showSummary, setShowSummary] = useState(false);
+
+  /* ── 입력 중 자동저장 (새로고침해도 데이터 유지) ── */
+  useEffect(() => {
+    const tm = setTimeout(() => {
+      try { localStorage.setItem("b_step3", JSON.stringify({ accom: st })); } catch(e) {}
+    }, 500);
+    return () => clearTimeout(tm);
+  }, [st]);
 
   const { travelers, overnightRoutes, accoms, curRoute } = st;
 
