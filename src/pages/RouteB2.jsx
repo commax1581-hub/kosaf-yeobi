@@ -53,6 +53,12 @@ const Link = ({ href, children }) => (
 );
 
 const fmtW = n => Math.round(n || 0).toLocaleString("ko-KR") + "원";
+/* 입력란 아래 콤마 미리보기 */
+const MoneyHint = ({v}) => {
+  const n = parseInt(v) || 0;
+  if (!v || n <= 0) return null;
+  return <div className="text-xs text-blue-600 font-semibold mt-1">= {n.toLocaleString("ko-KR")}원</div>;
+};
 
 /* ── App 밖에 정의 → 재렌더링 시 재생성 없음 → input 타이핑 정상 ── */
 const CardSelect = ({ value, onChange }) => (
@@ -408,6 +414,7 @@ export default function RouteB2() {
             <input className={inp} type="number" value={t.fare}
               placeholder="실제 운임 입력"
               onChange={e => updT(cur, { fare: e.target.value })} />
+            <MoneyHint v={t.fare} />
 
             <div className={lbl}>결제 수단</div>
             <CardSelect value={t.cardType} onChange={v => updT(cur, { cardType: v })} />
@@ -520,6 +527,7 @@ export default function RouteB2() {
                 <input className={inp} type="number" value={t.pubFare}
                   placeholder="확인한 대중교통 요금 입력"
                   onChange={e => updT(cur, { pubFare: e.target.value })} />
+                <MoneyHint v={t.pubFare} />
                 <label className="flex items-center gap-2 mt-2 cursor-pointer">
                   <input type="checkbox" checked={t.pubFareImg}
                     onChange={e => updT(cur, { pubFareImg: e.target.checked })}
@@ -694,4 +702,5 @@ export default function RouteB2() {
     </div>
   );
 }
+
 
