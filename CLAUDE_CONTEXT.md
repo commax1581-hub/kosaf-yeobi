@@ -1,6 +1,6 @@
 # CLAUDE_CONTEXT.md
 # KOSAF 여비를 부탁해 — AI 작업 컨텍스트 파일
-# 마지막 업데이트: 2026-04-13 (전체 세션 반영 최종본)
+# 마지막 업데이트: 2026-05-31 (데이터 안정성·테스트·GA4 반영)
 
 ---
 
@@ -15,6 +15,7 @@
 | 기술스택 | React + Vite + Tailwind CSS + Vercel (무료 Hobby 플랜) |
 | 폰트 | Noto Sans KR (앱 전체 + 보고서) |
 | 규정 기준 | 한국장학재단 여비규칙 (2023.7.21 개정) |
+| Google Analytics | GA4 측정 ID: `G-6E2LVC7XLJ` (index.html에 설치) |
 
 ---
 
@@ -22,13 +23,15 @@
 
 ```
 /
-├── index.html              ← Noto Sans KR Google Fonts 링크 포함
+├── index.html              ← Noto Sans KR 폰트 + GA4(G-6E2LVC7XLJ) 스크립트
 ├── package.json
 ├── vite.config.js
 ├── tailwind.config.js
 ├── vercel.json
 ├── CLAUDE_CONTEXT.md       ← 이 파일
 ├── CHANGELOG.md            ← 변경 이력
+├── test/
+│   └── calc.test.mjs       ← 계산 로직 단위 테스트 (node test/calc.test.mjs)
 └── src/
     ├── index.css           ← body,*{ font-family:'Noto Sans KR',sans-serif }
     ├── main.jsx
@@ -93,8 +96,15 @@ v="C"               → /c   (sessionStorage → RouteC useEffect 자동 로드)
 판별 불가           → 오류 메시지
 
 sessionStorage 키: "kosaf_json_load" (1회성, 읽은 후 즉시 삭제)
-localStorage 키: b_step1, b_step2, b_step3, b_step4
+localStorage 키: b_step1, b_step2, b_step3, b_step4, b_step4_raw
 ```
+
+**자동저장 (B1~B4 전 단계, 2026-05-31~)**: 각 단계에서 입력 0.5초 후 localStorage 자동저장 + 진입 시 복원
+- B1: `init()`에서 b_step1 복원 / useEffect로 자동저장
+- B2: `ts` 초기값 b_step2.transport 복원 / useEffect 자동저장
+- B3: `st` 초기값 b_step3.accom 구조 검증 후 복원 / useEffect 자동저장
+- B4: raw 상태(dayData·extSupport)를 **별도 키 `b_step4_raw`**에 자동저장·복원 (정식 b_step4는 "다음" 버튼에서 가공 저장)
+- 효과: 입력 중 새로고침해도 데이터 유지
 
 ---
 
@@ -139,6 +149,8 @@ localStorage 키: b_step1, b_step2, b_step3, b_step4
 
 **보고서 스타일**: 흑백 (검정·회색), Noto Sans KR, @import Google Fonts 포함, 컬러 없음
 
+**보고서 출력 (ReportOverlay, A·B·C 공통, 2026-05-31~)**: `iframe srcDoc`으로 미리보기 + 🖨️ 인쇄/PDF 저장 버튼(window.print) + 💾 HTML 저장 버튼 병행. `React.useRef`로 iframe 제어 (import React 필요)
+
 ---
 
 ## 기능별 상세
@@ -165,15 +177,19 @@ localStorage 키: b_step1, b_step2, b_step3, b_step4
 
 **B5**:
 - `loadFromStorage()`: b_step1~4 통합, dept/origin 포함
+- `segTransport(t)`: 교통편 1건의 {corp, personal} 운임 산출 — 연료비(calcFuel)·통행료(tollCard)·주차료(parkingCard)·운임 모두 카드구분별 합산. **calcAmounts·보고서 trs 모두 이 함수 사용**
+- `FUEL_TYPES`: 연비표 (휘발유 11.97 / 경유 12.52 / LPG 8.83 / 하이브리드 15.37 / 플러그인 10.61 / 전기 2.84 / 수소 94.9)
 - `buildDynCats()`: group = "route"/"proof"/"receipt"
 - 이미지: rI(route) + pI(proof) + rR(receipt) + xI(extra) → 모두 `.base64` 방어
 - `imgPages()`: 4장씩 2×2 그리드
+- 보고서 연료비 산출근거 표시: `거리km × 단가원 ÷ 연비 = 금액`
 - JSON: v:"B" + steps 포함
 - sessionStorage 자동 로드 (B4→B5 진입 or JSON 업로드)
 
 ### C경로 (RouteC.jsx)
 - `iS()`: dept:"", origin:"", name:"", grade:"", ...
-- 교통: inbound/outbound 각 1회, carMode별 계산, cFuel()
+- 교통: inbound/outbound 각 1회, `segT(t)` 헬퍼로 운임 산출 (B5 segTransport와 동일 로직, 필드명 toll/park)
+- `segDesc(t)`: 보고서 수단 설명 + 연료비 산출근거 표시
 - 일비: bdAmt() (합숙 여부 반영)
 - 이미지: {confirm, transport, accom, etc} → v&&v.base64 방어
 - sessionStorage 자동 로드 useEffect 포함
@@ -209,6 +225,11 @@ max-height: 320px per image
 6. **useEffect import**: 추가 시 import 확인
 7. **빌드 확인**: `npm run build` 성공 후 배포
 8. **보고서 CSS**: `@import url('https://fonts.googleapis.com/...')` 필수
+9. **교통비 계산**: B5는 `segTransport(t)`, C는 `segT(t)` 사용 — 연료비·통행료·주차료·운임 카드구분별 합산. 직접 `t.fare`만 읽으면 연료비/통행료/주차료 누락됨 (2026-05-30 버그)
+10. **genHTML 스코프**: `genHTML()` 안에서 `I()`·`calcFuel()` 등 사용 시 해당 함수가 그 스코프에 정의돼 있는지 확인 (calcAmounts 스코프 함수 사용 시 ReferenceError)
+11. **자동저장**: B1~B4 수정 시 useState 초기값 복원 + useEffect 자동저장 로직 유지. B4는 `b_step4_raw` 키 사용
+12. **계산 로직 수정 후**: 반드시 `node test/calc.test.mjs` 실행해 20개 케이스 통과 확인. 로직 변경 시 테스트 파일도 함께 갱신
+13. **ReportOverlay 수정**: A·B5·C 3곳에 동일 컴포넌트 복제됨 — 한 곳 고치면 3곳 모두 반영. `import React` 필요 (useRef 사용)
 
 ---
 
@@ -230,8 +251,27 @@ Claude 프로젝트: "KOSAF 여비 시스템"
 지침: CLAUDE_PROJECT_INSTRUCTIONS.md 내용 등록
 
 작업 완료 후 루틴:
-  "오늘 변경사항 CHANGELOG에 추가해줘"
-  → 업데이트 파일 다운로드 → 프로젝트 지식 재업로드
+  "CHANGELOG 정리해줘"
+  → ① CHANGELOG.md 업데이트
+  → ② [필수] CONTEXT.md 영향 점검 (아래 체크리스트)
+  → ③ 변경된 파일 다운로드 → 프로젝트 지식 재업로드
+```
+
+**★ CHANGELOG ↔ CONTEXT 동반 갱신 규칙 (중요)**
+CHANGELOG를 갱신할 때마다 Claude는 아래를 자동 점검하고, 해당되면 CONTEXT.md도 함께 업데이트해 양쪽 파일을 같이 제공한다.
+
+CONTEXT 갱신이 필요한 변경 유형 (체크리스트):
+- [ ] 파일/폴더 신규 추가·삭제 → "파일 구조" 갱신
+- [ ] localStorage/sessionStorage 키 추가·변경 → "데이터 흐름" 갱신
+- [ ] 핵심 계산 함수·헬퍼 추가·로직 변경 → "기능별 상세" + "주의사항" 갱신
+- [ ] 규정 해석 변경 → "확정된 여비규칙 해석" 갱신
+- [ ] 보고서 구조·출력 방식 변경 → "보고서 구조" 갱신
+- [ ] 새 외부 연동(GA 등) → "시스템 개요" 갱신
+- [ ] 반복 주의가 필요한 버그 패턴 발견 → "수정 시 절대 주의사항" 추가
+
+위 중 하나라도 해당하면 → CHANGELOG + CONTEXT 둘 다 갱신 후 함께 다운로드 제공.
+단순 UX 문구·색상 등 구조 영향 없는 변경은 CHANGELOG만 갱신 (CONTEXT 생략 가능).
+CONTEXT 갱신 시 헤더의 "마지막 업데이트" 날짜도 함께 변경.
 ```
 
 ---
@@ -245,4 +285,6 @@ Claude 프로젝트: "KOSAF 여비 시스템"
 | `CLAUDE_CONTEXT.md` | 이 파일 (AI 작업 컨텍스트) |
 | `CHANGELOG.md` | 날짜별 변경 이력 |
 | `CLAUDE_PROJECT_INSTRUCTIONS.md` | Claude 프로젝트 지침 문구 |
+| `test/calc.test.mjs` | 여비 계산 로직 단위 테스트 (20개 케이스) |
 | `deploy_update/src/pages/` | 최신 배포용 파일 모음 |
+
