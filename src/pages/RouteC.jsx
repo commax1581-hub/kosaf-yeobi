@@ -486,6 +486,7 @@ function gHTML(s, adjs, imgs){
     +"<h2>가. 연수 기본정보</h2>"
     +"<table><tr><th>항목</th><th>내용</th></tr>"
     +"<tr><td class=g>소속부서</td><td>"+(s.dept||"—")+"</td></tr>"
+    +"<tr><td class=g>출발지</td><td>"+(s.origin||s.dept||"—")+"</td></tr>"
     +"<tr><td class=g>신청자</td><td><b>"+(s.name||"—")+" ("+s.grade+")</b></td></tr>"
     +"<tr><td class=g>연수명</td><td>"+(s.trainingName||"—")+"</td></tr>"
     +"<tr><td class=g>연수 기관</td><td>"+(s.trainingOrg||"—")+"</td></tr>"
