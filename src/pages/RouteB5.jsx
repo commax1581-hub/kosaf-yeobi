@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const fmtW = n => Math.round(n||0).toLocaleString("ko-KR")+"원";
@@ -329,6 +329,13 @@ const ROUTE_TYPE="국내출장";
 /* ══════════════ 메인 ══════════════ */
 /* ── 보고서 오버레이 컴포넌트 (App 밖) ── */
 const ReportOverlay = ({html, fileName, onClose}) => {
+  const iframeRef = React.useRef(null);
+  const handlePrint = () => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+  };
   const handleSaveHtml = () => {
     try {
       const blob = new Blob([html], {type:"text/html;charset=utf-8"});
@@ -347,22 +354,30 @@ const ReportOverlay = ({html, fileName, onClose}) => {
   return (
     <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",background:"rgba(0,0,0,0.75)",zIndex:9999,display:"flex",flexDirection:"column"}}>
       <div style={{background:"#1e3a5f",padding:"10px 16px",display:"flex",alignItems:"center",gap:"8px",flexShrink:0,flexWrap:"wrap"}}>
-        <span style={{color:"#fff",fontWeight:600,fontSize:"14px"}}>📄 정산 보고서</span>
-        <span style={{color:"#93c5fd",fontSize:"11px",flex:1}}>HTML 저장 → 브라우저에서 열기 → Ctrl+P로 인쇄</span>
+        <span style={{color:"#fff",fontWeight:600,fontSize:"14px"}}>📄 정산 보고서 미리보기</span>
+        <span style={{flex:1}}/>
+        <button onClick={handlePrint}
+          style={{background:"#2563eb",color:"#fff",border:"none",borderRadius:"6px",padding:"7px 16px",fontSize:"13px",fontWeight:700,cursor:"pointer"}}>
+          🖨️ 인쇄 / PDF 저장
+        </button>
         <button onClick={handleSaveHtml}
-          style={{background:"#16a34a",color:"#fff",border:"none",borderRadius:"6px",padding:"6px 14px",fontSize:"13px",fontWeight:600,cursor:"pointer"}}>
-          💾 HTML 저장 (인쇄용)
+          style={{background:"#16a34a",color:"#fff",border:"none",borderRadius:"6px",padding:"7px 14px",fontSize:"13px",fontWeight:600,cursor:"pointer"}}>
+          💾 HTML 저장
         </button>
         <button onClick={onClose}
-          style={{background:"transparent",color:"#93c5fd",border:"1px solid #3b82f6",borderRadius:"6px",padding:"6px 12px",fontSize:"13px",cursor:"pointer"}}>
+          style={{background:"transparent",color:"#93c5fd",border:"1px solid #3b82f6",borderRadius:"6px",padding:"7px 12px",fontSize:"13px",cursor:"pointer"}}>
           ✕ 닫기
         </button>
       </div>
-      <div style={{background:"#fef9c3",padding:"8px 16px",fontSize:"12px",color:"#92400e",flexShrink:0}}>
-        💡 저장된 .html 파일을 브라우저로 열고 Ctrl+P(인쇄)를 누르면 PDF로 저장할 수 있습니다.
+      <div style={{background:"#dbeafe",padding:"7px 16px",fontSize:"12px",color:"#1e40af",flexShrink:0}}>
+        💡 <b>인쇄 / PDF 저장</b> 버튼 클릭 → 인쇄 창에서 <b>대상: PDF로 저장</b> 선택 &nbsp;|&nbsp; 또는 HTML 저장 후 브라우저에서 열어 Ctrl+P
       </div>
-      <div style={{flex:1,overflowY:"auto",background:"#fff"}}
-        dangerouslySetInnerHTML={{__html:html}}/>
+      <iframe
+        ref={iframeRef}
+        srcDoc={html}
+        style={{flex:1,border:"none",background:"#fff"}}
+        title="보고서 미리보기"
+      />
     </div>
   );
 };
