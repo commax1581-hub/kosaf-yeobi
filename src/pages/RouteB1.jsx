@@ -31,7 +31,7 @@ const TBtn = ({sel,onClick,children,small}) => (
   >{children}</button>
 );
 
-const init = () => ({
+const initDefault = () => ({
   step:0,
   dept:"", origin:"",
   name:"", grade:"",
@@ -40,6 +40,16 @@ const init = () => ({
   companions:[{name:"",grade:""}],
   routes:[{region:"",place:"",reason:"",nights:0}],
 });
+const init = () => {
+  // 새로고침 시 데이터 유지: 저장된 b_step1이 있으면 복원
+  try {
+    const saved = JSON.parse(localStorage.getItem("b_step1") || "null");
+    if (saved && typeof saved === "object") {
+      return { ...initDefault(), ...saved, step:0 };
+    }
+  } catch(e) {}
+  return initDefault();
+};
 
 function calcDays(s){
   if(!s.startDate||!s.endDate) return null;
@@ -83,8 +93,21 @@ export default function RouteB1(){
   }, []);
 
   const [s,setS]=useState(init());
+  const [autoSaved,setAutoSaved]=useState(false);
 
   const upd=useCallback(p=>setS(prev=>({...prev,...p})),[]);
+
+  /* ── 입력 중 자동저장 (새로고침해도 데이터 유지) ── */
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        const {step, ...data} = s;
+        localStorage.setItem("b_step1", JSON.stringify(data));
+        setAutoSaved(true);
+      } catch(e) {}
+    }, 500); // 입력 0.5초 후 저장
+    return () => clearTimeout(t);
+  }, [s]);
 
   /* ── 브라우저 닫기 경고 ── */
   useEffect(() => {
@@ -153,6 +176,10 @@ export default function RouteB1(){
       </div>
 
       {/* 진행 바 */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-xs font-semibold text-gray-600">기본정보 입력 <span className="text-blue-600">{s.step+1}/{STEPS.length}</span> · {STEPS[s.step]}</div>
+        {autoSaved && <div className="text-xs text-green-600 flex items-center gap-1">💾 자동 저장됨</div>}
+      </div>
       <div className="flex gap-1 mb-2">
         {STEPS.map((_,i)=>(
           <div key={i} className={"flex-1 h-2 rounded-full transition-all "+(i<s.step?"bg-blue-500":i===s.step?"bg-blue-400":"bg-gray-200")}/>
@@ -579,4 +606,5 @@ export default function RouteB1(){
     </div>
   );
 }
+
 
